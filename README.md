@@ -1,28 +1,10 @@
-# ss
+Dear colleagues,
 
-import pandas as pd
+I am excited to announce a new initiative aimed at helping us all learn more about Azure, one of the most popular cloud computing platforms used by businesses today. As a mentor for this program, I am eager to share my knowledge and help guide you through the process of getting started with Azure.
 
-# create the initial dataframe
-df = pd.DataFrame({'ID': [1, 2, 3], 'CODE': ['ABC', 'XYZ', 'LMN.'], 'CODE_DESC': ['A FOR APPLE', 'Z FOR ZEBRA', 'L FOR LOTUS']})
+Whether you are new to the platform or already have some experience, this initiative will provide you with valuable insights and practical tips to help you become more proficient with Azure. You will learn how to create and manage virtual machines, configure networks, and deploy applications, among other things.
 
-# create a list to hold the modified rows
-new_rows = []
+I invite you to join us for this initiative and take advantage of this opportunity to enhance your skills and advance your career. Let's work together to make the most of what Azure has to offer.
 
-# iterate over the rows of the dataframe
-for i, row in df.iterrows():
-    # add the original row
-    new_rows.append(row)
-
-    # create a new row with modified values
-    new_row = {'ID': row['ID'], 'CODE': 'CA-' + row['CODE'], 'CODE_DESC': 'CA-' + row['CODE_DESC']}
-    # add the modified row
-    new_rows.append(new_row)
-
-# create a new dataframe with the modified rows
-new_df = pd.DataFrame(new_rows)
-
-# set the index to the ID column
-new_df.set_index('ID', inplace=True)
-
-# display the resulting dataframe
-print(new_df)
+Best regards,
+[Your Name]
