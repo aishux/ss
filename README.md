@@ -60,7 +60,8 @@ class GmisFactStandardizationMonthly(feedType: String) extends Standardization {
     
     .where(expr("EXT_CC_IDENT IN select distinct level14_code from provision.gwm_wmpc-hier_cema_cost_center_tgt_cema where as_of.dt in (select max(as_of_Dt) from provision.gwm_wmpc-hier-cema_cost_center_tgt_cema where CAST (as_of_dt AS DECIMAL) IS NOT NULL) and Level2-gers_node in ('N14951'))"))
 
-    modifiedTable.withColumn("ext_cc_ident", when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC")).otherwise(modifiedTable("ext_cc_ident")))
+    modifiedTable.join(hierarchyDf, modifiedTable("ext_cc_ident") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
+.withColumn("ext_cc_ident", when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC")).otherwise(modifiedTable("ext_cc_ident")))
 
     modifiedTable
   }
