@@ -1,29 +1,55 @@
-Title: Certi-Fridays: Azure Certification Made Easy
+import com.ubs.gpc.gmis.transformations.standardization.Standardization
+import com.ubs.gpc.gmis.commons.spark.DataframeExtension._
+import com.ubs.gpc.gmis.commons.spark.UtilsSpark.JoinType
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
-Introduction:
-In an era where cloud computing is revolutionizing industries, staying ahead with the latest technology is paramount. To address this need, an exceptional initiative called "Certi-Fridays" was launched, focusing on coaching and mentoring participants from Airoli, Pune-EON, and Pune-Commerzone locations on Azure. The resounding success of this program was evidenced by the overwhelming response, with over 30 participants applying for vouchers and scheduling exams for AZ-900. Let's dive into the highlights of this transformative event that took place over five insightful days.
+class GmisFactStandardizationMonthly(feedType: String) extends Standardization {
 
-Fueling Azure Aspirations:
-Certi-Fridays became a catalyst for participants to embark on their journey towards Azure certification. This on-campus event provided an ideal setting for one-to-one interactions, fostering an environment conducive to effective knowledge exchange. The Certified Engineers Core Team spearheaded the organization, and the collaborative efforts of the mentors, trainers, and organizers ensured an enriching experience for all involved.
+  override val job_id: String = getJobId(feedType)
+  override val feed_type: String = feedType
+  override val step: String = "GMIS_FAST_MONTHLY_STANDARDIZATION"
+  override val targetTable: String = "governed_gmis_gpc_all_fact"
 
-A Comprehensive Curriculum:
-The five-day program covered a wide range of Azure topics, ensuring participants gained a holistic understanding of the platform's capabilities. Each day was dedicated to specific areas of Azure expertise:
-- Day 1: Cloud Concepts and its Benefits
-- Day 2: Azure Architecture and Services
-- Day 3: Azure Storage Services & Identity Management
-- Day 4: Azure Cost Management, Governance, and Compliance
-- Day 5: Azure Monitoring
+  override protected val aggregationKeys: List[String] = List(
+    "ext_tim_ident", "ext_spl_ident", "ext_cc_ident", "ext_ca_ident", "ext_sit_ident",
+    "ext_bsg_ident", "ext_prd_ident", "ext_mnd_ident", "ext_msr_ident",
+    "ext_ucc_ident", "ext_psg_ident", "ext_nat_ident"
+  )
 
-Personalized Mentorship:
-The mentors, Aishwarya, Nishant, and Premanjali, played an integral role in guiding and supporting participants throughout their certification journey. Their dedication ensured that participants were not only equipped with knowledge but also received assistance in registering for vouchers, resolving exam-related queries, and scheduling exams. The personalized mentorship was instrumental in instilling confidence and empowering participants to achieve their goals.
+  def getOutputDf(implicit spark: SparkSession): DataFrame =
+    List(fnWmbbchMonthlyStandardization(), fnInsightMonthlyStandardization()).reduce(_ unionAll _)
 
-Success Breeds Success:
-The success of Certi-Fridays was evident in the exceptional number of participants, with over 30 individuals registering for vouchers and eagerly commencing their exam preparations. The initiative not only provided a comprehensive learning experience but also ignited the participants' passion for Azure. As they embark on their certification journey, Certi-Fridays has laid a strong foundation for their future success in the dynamic world of cloud computing.
+  override def continue(args: Array[String]): Unit = mainFunc
 
-Participant and Trainer Feedback:
-The feedback from participants, mentors, and trainers further emphasizes the event's impact. Participants expressed their gratitude for the opportunity to learn from industry experts and praised the one-to-one interactions, which enabled them to grasp complex concepts with ease. The trainers, Parag and Madhwi, shared their satisfaction in witnessing the participants' growth and their enthusiasm for the subject matter.
+  def fnWmbbchMonthlyStandardization()(implicit spark: SparkSession): DataFrame = {
 
-Conclusion:
-Certi-Fridays emerged as a resounding success, fueling the aspirations of individuals seeking to excel in the Azure ecosystem. The initiative's holistic approach, personalized mentorship, and comprehensive curriculum played key roles in empowering participants to register for vouchers, schedule exams, and embark on their certification journeys. The positive feedback from participants and trainers underscores the impact Certi-Fridays had on their professional growth.
+    val hierarchyTable = "governed.gmis_hierarchy_cema_cost_center_governed"
+    val inputTable = "governed_gmis_gpc_wmbbch_data"
 
-Certi-Fridays stands as a testament to the power of dedicated mentorship, collaborative learning, and community-driven initiatives. As organizations embrace the potential of the cloud, nurturing talent through events like Certi-Fridays will continue to be instrumental in building a skilled workforce equipped for the challenges of the digital era. With the success of this program, the future holds immense promise for individuals pursuing Azure certifications and unlocking new opportunities in the world of cloud computing.
+    val inputDf = spark.table(inputTable)
+    val hierarchyDf = spark.table(hierarchyTable)
+
+    val modifiedTable = scanLatestLoadDate(inputTable)
+      .selectExpr(
+        "substr(TIME_STAMP_START, 1, 6) as ext_tim_ident",
+        "ext_spl_ident",
+        "ext_org_id as ext_cc_ident",
+        "ext_sit_id as ext_sit_ident",
+        "ext_bsg_id as ext_bsg_ident",
+        "ext_prd_id as ext_prd_ident",
+        "ext_mnd_id as ext_mnd_ident",
+        "ext_ms_id as ext_msr_ident",
+        "ext_psg_id as ext_psg_ident",
+        "ext_nat_id as ext_nat_ident",
+        "AMOUNT_CHF",
+        "AMOUNT_USD"
+      )
+      .withColumn("ext_spl_ident", expr("substring(ext_spl_ident, 3, length(ext_spl_ident)-1)"))
+      .standardizeCol(dfDateMap, "ext_tim_ident", "Cob_Date_with_year_month", col("COB_DATE_STR"), JoinType.INNER)
+      .standardizeCol(df_wmbbch_org_hierarchy, "ext_cc_ident", "source_code")
+      .standardizeCol(df_wmbbch_sit_hierarchy, "ext_sit_ident", "source_code", expr("substring(target_code, 3, length(target_code)-1)"))
+      .standardizeCol(df_wmbbch_bsg_hierarchy, "ext_bsg_ident", "source_code", expr("substring(target_code, 3, length(target_code)-1)"))
+      .standardizeCol(df_wmbbch_prd_hierarchy, "ext_prd_ident", "source_code")
+      .standardizeCol(df_wmbbch_mnd_hierarchy, "ext_mnd_ident", "source_code")
+      .standardizeCol(df_wmbbch_msr_hierarchy, "ext_msr_ident", "source_code", coalesce(col
