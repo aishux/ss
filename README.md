@@ -52,4 +52,19 @@ class GmisFactStandardizationMonthly(feedType: String) extends Standardization {
       .standardizeCol(df_wmbbch_bsg_hierarchy, "ext_bsg_ident", "source_code", expr("substring(target_code, 3, length(target_code)-1)"))
       .standardizeCol(df_wmbbch_prd_hierarchy, "ext_prd_ident", "source_code")
       .standardizeCol(df_wmbbch_mnd_hierarchy, "ext_mnd_ident", "source_code")
-      .standardizeCol(df_wmbbch_msr_hierarchy, "ext_msr_ident", "source_code", coalesce(col
+      .standardizeCol(df_wmbbch_msr_hierarchy, "ext_msr_ident", "source_code", coalesce(col("target_code"), col("ext_msr_ident")))
+      .standardizeCol(df_wmbbch_psg_hierarchy, "ext_psg_ident", "source_code", expr("substring(target_code, 3, length(target_code)-1)"))
+      .standardizeCol(df_wmbbch_nat_hierarchy, "ext_nat_ident", "source_code", expr("substring(target_code, 3, length(target_code)-1)"))
+      .withColumn("ext_cc_ident", expr("case when length(ext_org_id) = 6 then substring(ext_org_id, 3, length(ext_org_id)-1) when length(ext_org_id) = 15 then substring(ext_org_id, 3, 4) end"))
+      .join(hierarchyDf, scanLatestLoadDate(inputTable)("ext_cc_ident") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
+      .withColumn("ext_cc_ident", when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC")).otherwise(scanLatestLoadDate(inputTable)("ext_cc_ident")))
+
+    modifiedTable
+  }
+
+  def fnInsightMonthlyStandardization()(implicit spark: SparkSession): DataFrame = {
+    val inputTable = "governed_gmis_gpc_insight_data"
+    scanLatestLoadDate(inputTable)
+      .withColumn("ext_cc_ident", lit("EXT_CC_IDENT")) // Placeholder code, replace with actual logic
+  }
+}
