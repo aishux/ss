@@ -17,7 +17,7 @@ def fnWmbbchMonthlyStandardization()(implicit spark: SparkSession): DataFrame = 
 
     .withColumn("EXT_CC_IDENT",
       when(
-        col("PARENT_COST_CENTER_CODE").isNull || isParentCodePresentUDF(col("COST_CENTER_CODE"), col("PARENT_COST_CENTER_CODE")),
+        !isParentCodePresentUDF(col("COST_CENTER_CODE"), col("PARENT_COST_CENTER_CODE")),
         when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
           .otherwise(expr("find_rep_cc(COST_CENTER_CODE, PARENT_COST_CENTER_CODE)"))
       )
