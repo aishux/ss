@@ -4,28 +4,27 @@ def fnWmbbchMonthlyStandardization()(implicit spark: SparkSession): DataFrame = 
   val inputDf = spark.table(inputTable)
   val hierarchyDf = spark.table(hierarchyTable)
 
-  def find_rep_cc(costCenterCode: String, parentCostCenterCode: String): String = {
-    val tempVariable = parentCostCenterCode
-
-    val repCc = hierarchyDf.filter(hierarchyDf("COST_CENTER_CODE") === tempVariable)
-      .select("REP_CC")
-      .first()
-      .getAs[String]("REP_CC")
-
-    repCc
+  // Function to check if COST_CENTER_CODE is present in PARENT_COST_CENTER_CODE
+  def isParentCodePresent(costCenterCode: String, parentCostCenterCode: String): Boolean = {
+    hierarchyDf.filter(hierarchyDf("COST_CENTER_CODE") === parentCostCenterCode && hierarchyDf("PARENT_COST_CENTER_CODE") === costCenterCode).count() > 0
   }
 
-  val findRepCcUDF = udf(find_rep_cc(_: String, _: String))
+  // UDF to apply the check in the withColumn logic
+  val isParentCodePresentUDF = udf(isParentCodePresent _)
 
   val modifiedTable = scanLatestLoadDate(inputTable)
-    .selectExpr(
-      // Column selection code
+    // other transformations...
+
+    .withColumn("EXT_CC_IDENT",
+      when(
+        col("PARENT_COST_CENTER_CODE").isNull || isParentCodePresentUDF(col("COST_CENTER_CODE"), col("PARENT_COST_CENTER_CODE")),
+        when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
+          .otherwise(expr("find_rep_cc(COST_CENTER_CODE, PARENT_COST_CENTER_CODE)"))
+      )
+      .otherwise(col("EXT_CC_IDENT"))
     )
-    .withColumn("EXT_CC_IDENT", when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
-      .otherwise(when(hierarchyDf("REP_CC").isNull, findRepCcUDF(col("EXT_CC_IDENT"), col("PARENT_COST_CENTER_CODE")))
-      .otherwise(col("EXT_CC_IDENT"))))
 
-  // Rest of your modifications to the modifiedTable DataFrame
+    // remaining transformations...
 
-  modifiedTable
+    modifiedTable
 }
