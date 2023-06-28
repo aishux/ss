@@ -1,4 +1,7 @@
-def isParentCodePresent(costCenterCode: String, parentCostCenterCode: String): Boolean = {
-    val count = hierarchyDf.filter(s"COST_CENTER_CODE = '$parentCostCenterCode' AND PARENT_COST_CENTER_CODE = '$costCenterCode'").count()
-    count > 0
-  }
+// UDF to apply the check in the when logic
+  val isParentCodePresentUDF = udf((costCenterCode: String, parentCostCenterCode: String) =>
+    isParentCodePresent(costCenterCode, parentCostCenterCode)
+  )
+
+
+  
