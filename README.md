@@ -22,13 +22,21 @@ class GmisFactStandardizationMonthly(feedType: String) extends Standardization {
 
   override def continue(args: Array[String]): Unit = mainFunc
 
+  def find_rep_cc(costCenterCode: String, parentCostCenterCode: String)(implicit spark: SparkSession): String = {
+  val tempVariable = parentCostCenterCode
+  val repCc = hierarchyDf.filter(hierarchyDf("COST_CENTER_CODE") === tempVariable)
+    .select("REP_CC")
+    .first()
+    .getAs[String]("REP_CC")
+  repCc
+	}
+
   def fnWmbbchMonthlyStandardization()(implicit spark: SparkSession): DataFrame = {
     val hierarchyTable = "governed.gmis_hierarchy_cema_cost_center_governed"
     val inputTable = "governed_gmis_gpc_wmbbch_data"
     val inputDf = spark.table(inputTable)
     val hierarchyDf = spark.table(hierarchyTable)
-    // new
-    val joinedDf = inputDf.join(hierarchyDf, inputDf("EXT_CC_IDENT") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
+    
 
     val modifiedTable = scanLatestLoadDate(inputTable)
       .selectExpr(
@@ -60,9 +68,13 @@ class GmisFactStandardizationMonthly(feedType: String) extends Standardization {
     
     .where(expr("EXT_CC_IDENT IN select distinct level14_code from provision.gwm_wmpc-hier_cema_cost_center_tgt_cema where as_of.dt in (select max(as_of_Dt) from provision.gwm_wmpc-hier-cema_cost_center_tgt_cema where CAST (as_of_dt AS DECIMAL) IS NOT NULL) and Level2-gers_node in ('N14951'))"))
 
-    modifiedTable.join(hierarchyDf, modifiedTable("ext_cc_ident") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
-.withColumn("ext_cc_ident", when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC")).otherwise(modifiedTable("ext_cc_ident")))
+    // booking logic
+		modifiedTable.join(hierarchyDf, modifiedTable("EXT_CC_IDENT") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
+		.withColumn("EXT_CC_IDENT", when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
+    .otherwise(when(hierarchyDf("REP_CC").isNull, expr("find_rep_cc(COST_CENTER_CODE, PARENT_COST_CENTER_CODE)"))
+    .otherwise(modifiedTable("EXT_CC_IDENT"))))
 
+    
     modifiedTable
   }
 }
