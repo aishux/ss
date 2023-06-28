@@ -1,4 +1,4 @@
-import org.apache.spark.sql.types.StringType
+import org.apache.spark.sql.functions._
 
 // Rest of your code...
 
@@ -12,20 +12,21 @@ def fnWmbbchMonthlyStandardization()(implicit spark: SparkSession): DataFrame = 
   }
 
   // UDF to apply the check in the when logic
-  val isParentCodePresentUDF = udf(isParentCodePresent _)
+  val isParentCodePresentUDF = udf((costCenterCode: String, parentCostCenterCode: String) =>
+    isParentCodePresent(costCenterCode, parentCostCenterCode)
+  )
 
   val modifiedTable = scanLatestLoadDate(inputTable)
     // other transformations...
 
-    .withColumn("isParentCodePresent", isParentCodePresentUDF(col("COST_CENTER_CODE"), col("PARENT_COST_CENTER_CODE")))
     .withColumn("EXT_CC_IDENT",
-      when(col("isParentCodePresent"), col("EXT_CC_IDENT"))
-        .otherwise(
-          when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
-            .otherwise(expr("find_rep_cc(COST_CENTER_CODE, PARENT_COST_CENTER_CODE)"))
-        )
+      when(
+        !isParentCodePresentUDF(col("COST_CENTER_CODE").cast(StringType), col("PARENT_COST_CENTER_CODE").cast(StringType)),
+        when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
+          .otherwise(expr("find_rep_cc(COST_CENTER_CODE, PARENT_COST_CENTER_CODE)"))
+      )
+      .otherwise(col("EXT_CC_IDENT"))
     )
-    .drop("isParentCodePresent")
     // other transformations...
 
   modifiedTable
