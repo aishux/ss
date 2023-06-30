@@ -1,7 +1,1 @@
-// UDF to apply the check in the when logic
-  val isParentCodePresentUDF = udf((costCenterCode: String, parentCostCenterCode: String) =>
-    isParentCodePresent(costCenterCode, parentCostCenterCode)
-  )
-
-
-  
+I would like to express my appreciation for the Python training provided by the co-trainer. Their knowledge and expertise in Python programming were exceptional, making the learning experience engaging and valuable. The co-trainer effectively explained complex concepts, offered helpful examples, and encouraged active participation. I found the training sessions to be insightful and well-structured. Overall, I highly recommend the co-trainer for their excellent teaching abilities and dedication to fostering a strong understanding of Python programming.
