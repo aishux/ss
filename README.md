@@ -1,31 +1,44 @@
-def fnWmbbchMonthlyStandardization()(implicit spark: SparkSession): DataFrame = {
-  val hierarchyTable = "governed.gmis_hierarchy_cema_cost_center_governed"
-  val inputTable = "governed_gmis_gpc_wmbbch_data"
-  val inputDf = spark.table(inputTable)
-  val hierarchyDf = spark.table(hierarchyTable)
+import com.ubs.gpc.gmis.transformations.standardization.Standardization
+import com.ubs.gpc.gmis.commons.spark.DataframeExtension._
+import com.ubs.gpc.gmis.commons.spark.UtilsSpark.JoinType
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
-  def find_rep_cc(costCenterCode: String, parentCostCenterCode: String): String = {
-    val tempVariable = parentCostCenterCode
+class GmisFactStandardizationMonthly(feedType: String) extends Standardization {
 
-    val repCc = hierarchyDf.filter(hierarchyDf("COST_CENTER_CODE") === tempVariable)
-      .select("REP_CC")
-      .first()
-      .getAs[String]("REP_CC")
+  // ... (unchanged code)
 
-    repCc
+  def getOutputDf(implicit spark: SparkSession): DataFrame =
+    List(fnWmbbchMonthlyStandardization(), fnInsightMonthlyStandardization()).reduce(_ unionAll _)
+
+  override def continue(args: Array[String]): Unit = mainFunc
+
+  def fnWmbbchMonthlyStandardization()(implicit spark: SparkSession): DataFrame = {
+    // ... (unchanged code)
+
+    // Apply the logic to replace EXT_CC_IDENT values recursively
+    val outputTable = applyLogicToColumn(modifiedTable, hierarchyDf, "EXT_CC_IDENT")
+
+    outputTable
   }
 
-  val findRepCcUDF = spark.udf.register("find_rep_cc", find_rep_cc(_: String, _: String))
+  // Implement the applyLogicToColumn function here
+  def applyLogicToColumn(df: DataFrame, hierarchyDf: DataFrame, columnName: String): DataFrame = {
+    val tempTable = df
+      .join(hierarchyDf, df(columnName) === hierarchyDf("COST_CENTER_CODE"), "left_outer")
+      .filter(df("REP_CC").isNull)
+      .select(df(columnName).alias("TEMP_CC_IDENT"), hierarchyDf("REP_CC"), hierarchyDf("PARENT_COST_CENTER_CODE"))
 
-  val modifiedTable = scanLatestLoadDate(inputTable)
-    .selectExpr(
-      // Column selection code
-    )
-    .withColumn("EXT_CC_IDENT", when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
-      .otherwise(when(hierarchyDf("REP_CC").isNull, findRepCcUDF(col("EXT_CC_IDENT"), col("PARENT_COST_CENTER_CODE")))
-      .otherwise(col("EXT_CC_IDENT"))))
+    val replacedTable = df
+      .join(tempTable, df(columnName) === tempTable("PARENT_COST_CENTER_CODE"), "left_outer")
+      .withColumn(columnName, coalesce(tempTable("REP_CC"), df(columnName)))
 
-  // Rest of your modifications to the modifiedTable DataFrame
+    val remainingTable = replacedTable.filter(replacedTable("REP_CC").isNull)
 
-  modifiedTable
+    if (remainingTable.count() > 0) {
+      applyLogicToColumn(remainingTable, hierarchyDf, columnName)
+    } else {
+      replacedTable.drop("TEMP_CC_IDENT", "REP_CC", "PARENT_COST_CENTER_CODE")
+    }
+  }
 }
