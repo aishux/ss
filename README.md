@@ -14,7 +14,12 @@ class NodeLevel(feedType: String) {
 
     val modifiedTable = inputDf
       .join(hierarchyDf, inputDf("EXT_CC_IDENT") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
-      .withColumn("EXT_CC_IDENT", when(expr("EXT_CC_IDENT IN (SELECT DISTINCT PARENT_COST_CENTER_CODE FROM governed.gmis_hierarchy_cema_cost_center_governed WHERE REP_CC IS NOT NULL)"), hierarchyDf("REP_CC")).otherwise(inputDf("EXT_CC_IDENT")))
+      .withColumn(
+        "EXT_CC_IDENT",
+        expr(
+          s"CASE WHEN EXT_CC_IDENT IN (SELECT DISTINCT PARENT_COST_CENTER_CODE FROM governed.gmis_hierarchy_cema_cost_center_governed WHERE REP_CC IS NOT NULL) THEN REP_CC ELSE (SELECT REP_CC FROM governed.gmis_hierarchy_cema_cost_center_governed WHERE EXT_CC_IDENT = PARENT_COST_CENTER_CODE LIMIT 1) END"
+        )
+      )
 
     modifiedTable.show() // Print the modified table with the join result
     modifiedTable
