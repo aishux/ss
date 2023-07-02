@@ -14,14 +14,20 @@ class NodeLevel(feedType: String) {
     val hierarchyDf = spark.table(hierarchyTable)
 
     val modifiedTable = inputDf
-      .join(hierarchyDf, inputDf("EXT_CC_IDENT") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
-      .withColumn("EXT_CC_IDENT",
-        when(!col("PARENT_COST_CENTER_CODE").contains(inputDf("EXT_CC_IDENT")),
+      .join(hierarchyDf, inputDf("EXT_CC_IDNET") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
+      .withColumn("EXT_CC_IDNET",
+        when(!col("PARENT_COST_CENTER_CODE").contains(inputDf("EXT_CC_IDNET")),
           when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
-            .otherwise(expr("find_rep_cc(COST_CENTER_CODE, PARENT_COST_CENTER_CODE)"))
+            .otherwise(
+              hierarchyDf.filter(col("COST_CENTER_CODE") === col("PARENT_COST_CENTER_CODE"))
+                .select("REP_CC")
+                .first()
+                .getAs[String]("REP_CC")
+            )
         )
-        .otherwise(inputDf("EXT_CC_IDENT"))
+        .otherwise(inputDf("EXT_CC_IDNET"))
       )
+      .select(inputDf.columns.map(col): _*) // Select only the columns from the inputDf
 
     modifiedTable.show() // Print the modified table with the join result
     modifiedTable
