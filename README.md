@@ -1,33 +1,18 @@
- import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 
-class GmisFactStandardizationMonthly(feedType: String) extends Standardization {
-
-  // Existing code...
-
-  def fnWmbbchMonthlyStandardization()(implicit spark: SparkSession): DataFrame = {
-    // Existing code...
-
-    val modifiedTable = // Existing code...
-
-    val modifiedTableWithCC = modifiedTable
-      .join(hierarchyDf, modifiedTable("EXT_CC_IDENT") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
-      .withColumn("EXT_CC_IDENT",
-        when(
-          col("PARENT_COST_CENTER_CODE").contains(modifiedTable("EXT_CC_IDENT")),
-          modifiedTable("EXT_CC_IDENT")
-        ).otherwise(
-          when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
-            .otherwise(
-              hierarchyDf.filter(col("COST_CENTER_CODE") === col("PARENT_COST_CENTER_CODE"))
-                .select("REP_CC")
-                .first()
-                .getAs[String]("REP_CC")
-            )
-        )
-      )
-      .where(!col("PARENT_COST_CENTER_CODE").contains(col("EXT_CC_IDENT")))
-
-    modifiedTableWithCC
+class NodeLevel(feedType: String) {
+  val inputTable = "governed.input_table"
+  val hierarchyTable = "governed.gmis_hierarchy_cema_cost_center_governed"
+  
+  def fnNodeLevel()(implicit spark: SparkSession): DataFrame = {
+    val inputDf = spark.table(inputTable)
+    inputDf.show()  // Print the contents of the input table
+    inputDf
   }
 }
+
+val spark = SparkSession.builder().appName("Example").getOrCreate()
+val node = new NodeLevel("show tables")
+node.fnNodeLevel()(spark)
