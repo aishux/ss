@@ -6,28 +6,30 @@ class NodeLevel(feedType: String) {
   val inputTable = "governed.input_table"
   val hierarchyTable = "governed.gmis_hierarchy_cema_cost_center_governed"
   val outputTable = "governed.output_table"
-  
+
   def fnNodeLevel()(implicit spark: SparkSession): DataFrame = {
     val inputDf = spark.table(inputTable)
-    inputDf.show()  // Print the contents of the input table
+    inputDf.show() // Print the contents of the input table
 
     val hierarchyDf = spark.table(hierarchyTable)
 
     val modifiedTable = inputDf
       .join(hierarchyDf, inputDf("EXT_CC_IDNET") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
-      .withColumn("EXT_CC_IDNET",
-        when(!col("PARENT_COST_CENTER_CODE").contains(inputDf("EXT_CC_IDNET")),
-          when(hierarchyDf("REP_CC").isNotNull, hierarchyDf("REP_CC"))
-            .otherwise(
-              hierarchyDf.filter(col("COST_CENTER_CODE") === col("PARENT_COST_CENTER_CODE"))
-                .select("REP_CC")
-                .first()
-                .getAs[String]("REP_CC")
-            )
-        )
-        .otherwise(inputDf("EXT_CC_IDNET"))
+      .withColumn(
+        "EXT_CC_IDNET",
+        expr(
+          s"""
+             |CASE
+             |  WHEN !PARENT_COST_CENTER_CODE LIKE CONCAT('%', EXT_CC_IDNET, '%')
+             |    THEN CASE
+             |           WHEN REP_CC IS NOT NULL THEN REP_CC
+             |           ELSE (SELECT REP_CC FROM hierarchyDf WHERE COST_CENTER_CODE = PARENT_COST_CENTER_CODE LIMIT 1)
+             |         END
+             |  ELSE EXT_CC_IDNET
+             |END
+             |""".stripMargin)
       )
-      .select(inputDf.columns.map(col): _*) // Select only the columns from the inputDf
+      .drop(hierarchyDf.columns: _*) // Drop columns from the hierarchyDf
 
     modifiedTable.show() // Print the modified table with the join result
     modifiedTable
