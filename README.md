@@ -7,11 +7,9 @@ class NodeLevel(feedType: String) {
   val hierarchyTable = "governed.gmis_hierarchy_cema_cost_center_governed"
   val outputTable = "governed.output_table"
 
-  def fnNodeLevel()(implicit spark: SparkSession): DataFrame = {
+  def fnNodeLevel(hierarchyDf: DataFrame)(implicit spark: SparkSession): DataFrame = {
     val inputDf = spark.table(inputTable)
     inputDf.show() // Print the contents of the input table
-
-    val hierarchyDf = spark.table(hierarchyTable)
 
     val modifiedTable = inputDf
       .join(hierarchyDf, inputDf("EXT_CC_IDNET") === hierarchyDf("COST_CENTER_CODE"), "left_outer")
@@ -38,4 +36,8 @@ class NodeLevel(feedType: String) {
 
 val spark = SparkSession.builder().appName("Example").getOrCreate()
 val node = new NodeLevel("show tables")
-node.fnNodeLevel()(spark)
+
+// Retrieve the hierarchyDf DataFrame
+val hierarchyDf = spark.table("governed.gmis_hierarchy_cema_cost_center_governed")
+
+node.fnNodeLevel(hierarchyDf)(spark)
