@@ -1,10 +1,12 @@
 import org.apache.spark.sql.functions._
 
-val opdf = outputdf
+// Step 1: Renaming and filtering measure_cd column
+val step1DF = outputdf
   .withColumn("EXT_MSR_IDENT", col("measure_cd"))
-  .union(outputdf.withColumn("EXT_MSR_IDENT", col("group_account_cd")))
-  .drop("measure_cd", "group_account_cd")
-  .filter(when(col("EXT_MSR_IDENT").startsWith("AEQ"), true)
-    .when(col("EXT_MSR_IDENT").startsWith("BS"), true)
-    .when(col("EXT_MSR_IDENT").startsWith("FRS"), true)
-    .otherwise(false))
+  .filter(col("EXT_MSR_IDENT").startsWith("AEQ") || col("EXT_MSR_IDENT").startsWith("BS") || col("EXT_MSR_IDENT").startsWith("FRS"))
+  .drop("measure_cd")
+
+// Step 2: Vertically stack group_account_cd under EXT_MSR_IDENT
+val opdf = step1DF
+  .union(outputdf.select(col("group_account_cd").alias("EXT_MSR_IDENT")))
+  .select("EXT_MSR_IDENT")
