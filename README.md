@@ -1,15 +1,11 @@
-import org.apache.spark.sql.functions._
-import spark.implicits._
 
-// Step 1: Filter measure_cd column and rename it to EXT_MSR_IDENT_CODE
-val step1DF = outputdf
-  .filter(col("measure_cd").startsWith("AEQ") || col("measure_cd").startsWith("BS") || col("measure_cd").startsWith("FRS"))
-  .withColumn("EXT_MSR_IDENT_CODE", col("measure_cd"))
-  .drop("measure_cd", "group_account_cd")
+# Custom function to concatenate parent codes based on minimum and maximum parent levels
+def concatenate_parent_codes(group):
+    min_parent_code = group.loc[group['PARENT_LEVEL'].idxmin(), 'PARENT_CODE']
+    max_parent_code = group.loc[group['PARENT_LEVEL'].idxmax(), 'PARENT_CODE']
+    return f"[{min_parent_code}]&[{max_parent_code}]"
 
-// Step 2: Create DataFrame with EXT_MSR_IDENT column from group_account_cd
-val step2DF = outputdf
-  .select(col("group_account_cd").alias("EXT_MSR_IDENT"))
+# Group by 'KPI_ID' and apply the custom function to create the 'PARENT_MEMBER' column
+df['PARENT_MEMBER'] = df.groupby('KPI_ID').apply(concatenate_parent_codes).reset_index(drop=True)
 
-// Step 3: Union step1DF and step2DF
-val opdf = step1DF.union(step2DF)
+print(df)
