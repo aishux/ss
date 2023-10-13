@@ -1,11 +1,11 @@
-import java.util.stream.Collectors
-import java.util.stream.StreamSupport
-import scala.collection.JavaConverters._
+Hello [Team Name],
 
-// Assuming `strFlattenValueWoheader` is a Java Stream[String]
-val strList = StreamSupport.stream(strFlattenValueWoheader.spliterator(), false)
-  .collect(Collectors.toList[String]())
-  .asScala
-  .toList
+I'm excited about the upcoming hackathon and I'd love to join your team. I bring relevant skills in [mention your skills] and am eager to collaborate and contribute. Let's create something amazing together!
 
-val tempCSVdata: DataFrame = spark.sparkContext.parallelize(strList).toDF
+Best,
+[Your Name]
+
+
+
+
+
