@@ -1,15 +1,18 @@
-import re
+from flask import Flask, request, render_template
+import subprocess
 
-with open('output.txt', 'r', encoding='utf-8') as file:
-    text = file.read()
+app = Flask(__name)
 
-matches = re.findall(r'{(.*?)}', text, re.DOTALL)
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        email = request.form['email']
+        userid = request.form['userid']
+        
+        # Execute the shell script with user details
+        subprocess.run(['./script.sh', email, userid])
 
-cleaned_content = []
-for match in matches:
-    cleaned_match = re.sub(r'[^a-zA-Z0-9\s\n]', '', match)
-    cleaned_content.append('{' + cleaned_match + '}')
+    return render_template('index.html')
 
-with open('extract.txt', 'w', encoding='utf-8') as ext_file:
-    p = ext_file.write('\n'.join(cleaned_content))
-    print(p)
+if __name__ == '__main__':
+    app.run(debug=True)
