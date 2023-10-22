@@ -1,21 +1,48 @@
-from flask import Flask, request, render_template
-import subprocess
+const LOGINUSERNAME = 'ad';
+const PASSWORD = 'pwd';
+const kURL = 'https://google.com';
+let SESSIONID = '';
+const USERGPN = 'your_user_gpn_here'; // Replace with the desired user GPN.
 
-app = Flask(__name)
+async function getSessionIdFromServer() {
+  try {
+    const response = await fetch(`${kURL}/rest/login`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/JSON',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `username=${LOGINUSERNAME}&password=${PASSWORD}`,
+    });
 
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('index.html')
+    if (response.ok) {
+      const output = await response.json();
+      const LENTOREAD = output.length - 27;
+      SESSIONID = output.substring(25, 25 + LENTOREAD);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+}
 
-@app.route('/submit', methods=['POST'])
-def submit():
-    email = request.form['email']
-    userid = request.form['userid']
-    
-    # Execute the shell script with user details
-    subprocess.run(['./script.sh', email, userid])
+async function DELETE() {
+  await getSessionIdFromServer();
+  try {
+    const response = await fetch(`${kURL}/rest/user/${USERGPN}`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/JSON',
+        'sessionid': SESSIONID,
+      },
+    });
 
-    return "Form submitted successfully"
+    if (response.ok) {
+      const output = await response.text();
+      console.log(output);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+}
 
-if __name__ == '__main__':
-    app.run(debug=True)
+DELETE();
