@@ -1,4 +1,5 @@
-// If you want to run this code on the client side without using npm and axios, you can use the fetch API, which is available in modern web browsers. Here's the equivalent JavaScript code for the client-side:
+// If you want to run this code on the client side without using npm and axios, you can use the fetch API, which is available in modern web browsers. 
+// Here's the equivalent JavaScript code for the client-side:
 
 document.addEventListener("DOMContentLoaded", function () {
   const myForm = document.getElementById("myForm");
