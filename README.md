@@ -1,5 +1,1 @@
-Certainly, here are two concise points:
-
-1. **Domain Expertise:** I aim to deepen my understanding of our industry to make more informed decisions and be more impactful.
-
-2. **Skill Enhancement:** Strengthening technical and soft skills will help me excel in my role and collaborate effectively.
+Rutuja's strengths and achievements have been invaluable to our team. She possesses an exceptional understanding of our data, excels in stakeholder communication, and demonstrates a deep familiarity with reporting tools like Kyvos. Her ability to quickly analyze complex data, as evidenced by her work on the PSR analysis, significantly contributed to our project's success. Her impact is evident in the swift implementation of her analyses, which has streamlined our project and ensured timely and informed decision-making.
