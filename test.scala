@@ -1,42 +1,24 @@
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions._
+import java.time.LocalDate
+import java.time.temporal.WeekFields
+import java.util.Locale
 
-object YearlyToMonthly {
+object DateExtractor {
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder()
-      .appName("YearlyToMonthly")
-      .getOrCreate()
+    val currentDate = LocalDate.now()
 
-    import spark.implicits._
+    // Extract current month
+    val currentMonth = currentDate.getMonthValue
+    println(s"Current month: $currentMonth")
 
-    // Sample data
-    val data = Seq(
-      ("202301", 23456),
-      ("2024", 6000),
-      ("2021", 12000)
-    )
+    // Extract week number using ISO definition
+    val weekNumberISO = currentDate.get(WeekFields.ISO.weekOfWeekBasedYear())
+    println(s"Week number (ISO): $weekNumberISO")
 
-    val df = data.toDF("REPORTING_DATE", "AMOUNT")
+    // Define a Locale for Zurich, Switzerland (German-speaking part)
+    val zurichLocale = new Locale("de", "CH") // Language: German, Country: Switzerland
 
-    // Create a UDF to split yearly data into monthly data
-    val splitYearlyToMonthly = udf((year: String, amount: Int) => {
-      if (year.length == 4) {
-        val yearInt = year.toInt
-        (1 to 12).map { month =>
-          f"$yearInt%04d$month%02d" -> amount / 12
-        }
-      } else {
-        Seq(year -> amount)
-      }
-    })
-
-    // Apply the UDF and explode the array of tuples
-    val result = df.withColumn("monthly_data", explode(splitYearlyToMonthly($"REPORTING_DATE", $"AMOUNT")))
-
-    // Select and rename columns
-    val finalResult = result.select($"monthly_data._1".as("REPORTING_DATE"), $"monthly_data._2".as("AMOUNT"))
-
-    // Show the resulting DataFrame
-    finalResult.show()
+    // Extract week number using custom definition (e.g., Zurich Locale)
+    val weekNumberZurich = currentDate.get(WeekFields.of(zurichLocale).weekOfWeekBasedYear())
+    println(s"Week number (Custom, Zurich Locale): $weekNumberZurich")
   }
 }
