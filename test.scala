@@ -3,12 +3,13 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.Locale
 
-val currentDate = LocalDate.now()
+// Set a specific date (January 1st)
+val specificDate = LocalDate.of(2023, 1, 1)
 
 // Extract week number using ISO definition
-val weekNumberISO = currentDate.get(WeekFields.ISO.weekOfWeekBasedYear())
+val weekNumberISO = specificDate.get(WeekFields.ISO.weekOfWeekBasedYear())
 
 // Format week number with leading zeros (e.g., "01", "02", ..., "52")
 val formattedWeekNumber = f"$weekNumberISO%02d"
 
-println(s"Formatted Week number (ISO): $formattedWeekNumber")
+println(s"Formatted Week number (ISO) for January 1st: $formattedWeekNumber")
