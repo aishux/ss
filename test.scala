@@ -4,8 +4,8 @@ val monthlyAmounts: List[Double] = List(100.0, 150.0, 200.0, 180.0, 210.0, 190.0
 // Get the current month (replace with your logic to get the current month)
 val currentMonth: Int = java.time.LocalDate.now().getMonthValue
 
-// Calculate YTD amount including all months up to December
-val ytdAmount: Double = monthlyAmounts.take(Math.min(currentMonth, 12)).sum
+// Calculate YTD amount
+val ytdAmount: Double = monthlyAmounts.take(currentMonth).sum + monthlyAmounts.drop(currentMonth).sum
 
 // Display YTD amount
-println(s"Year-to-Date (YTD) amount including all months up to December: $ytdAmount")
+println(s"Year-to-Date (YTD) amount: $ytdAmount")
