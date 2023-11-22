@@ -42,6 +42,29 @@ def calculateSumAmounts(dataFrame: DataFrame, year: String): (Double, Double, Do
   (sumAmountUSD + sumAmountUSD2, sumAmountCHF + sumAmountCHF2, sumAmountGBP + sumAmountGBP2)
 }
 
+
+
+// Loop through each distinct EXT_MSR_IDENT value
+for (extMsrIdent <- distinctExtMsrIdent) {
+  val currentMonth = java.time.LocalDate.now().getMonthValue
+  val currentQuarter = (currentMonth - 1) / 3 + 1
+  
+  // Calculate the sums for the current EXT_MSR_IDENT
+  val (sumUSD, sumCHF, sumGBP) = calculateSumAmounts(yourDataFrame, extMsrIdent, yearValue, currentQuarter)
+
+  // Store the results in the list
+  resultsList :+= (extMsrIdent, currentQuarter, sumUSD, sumCHF, sumGBP)
+}
+
+// Convert the results list to a DataFrame
+import spark.implicits._
+val resultsDF = resultsList.toDF("EXT_MSR_IDENT", "currentQuarter", "AmountUSD", "AmountCHF", "AmountGBP")
+
+// Show the results DataFrame
+resultsDF.show()
+
+
+
 // Assuming 'spark' is your SparkSession and 'yourDataFrame' is the DataFrame
 val spark = SparkSession.builder()
   .appName("CalculateSumAmountsExample")
