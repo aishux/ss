@@ -48,6 +48,7 @@ def calculateSumAmounts(dataFrame: DataFrame, year: String): (Double, Double, Do
 
 
 // Loop through each distinct EXT_MSR_IDENT value
+var resultsList = List[(String, Int, Double, Double, Double)]()
 for (extMsrIdent <- distinctExtMsrIdent) {
   val currentMonth = java.time.LocalDate.now().getMonthValue
   val currentQuarter = (currentMonth - 1) / 3 + 1
