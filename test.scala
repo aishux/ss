@@ -12,7 +12,8 @@ val resultsDF: DataFrame = ??? // Replace ??? with your resultsDF DataFrame
 
 // Join timeDf and resultsDF based on EXT_MSR_IDENT and EXT_TIM_IDENT columns
 val joinedDF = timeDf.join(resultsDF,
-  Seq("EXT_MSR_IDENT", "EXT_TIM_IDENT"),
+  timeDf("EXT_MSR_IDENT") === resultsDF("current_EXT_MSR_IDENT") &&
+  timeDf("EXT_TIM_IDENT") === resultsDF("current_EXT_TIM_IDENT"),
   "left_outer"
 )
 
