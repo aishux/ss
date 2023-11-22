@@ -2,27 +2,39 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
 
 // Create a function to perform the required operations
-def calculateSumAmounts(dataFrame: DataFrame): (Double, Double, Double) = {
-  val filteredDF = dataFrame
+def calculateSumAmounts(dataFrame: DataFrame, year: String): (Double, Double, Double) = {
+  val filteredDF1 = dataFrame
     .filter(col("EXT_MSR_IDENT") === "CA123")
-    .filter(col("EXT_TIM_DETAIL").like("%2023%"))
+    .filter(col("EXT_TIM_DETAIL").like("%" + year + "%")) // Use the 'year' variable in the filter
     .filter(col("EXT_TVT_IDENT") === "M")
     .filter(col("QQ") < 4)
 
-  // Check if QQ = 0, if so, return (0, 0, 0) for sum amounts
-  if (filteredDF.filter(col("QQ") === 0).count() > 0) {
+  val filteredDF2 = dataFrame
+    .filter(col("EXT_MSR_IDENT") === "CA123")
+    .filter(col("EXT_TIM_DETAIL").like("%" + year + "%")) // Use the 'year' variable in the filter
+    .filter(col("EXT_TVT_IDENT") === "W")
+    .filter(col("QQ") === 4)
+    .filter(col("EXT_TIM_IDENT") <= s"$year-11-14") // Use the 'year' variable in the filter
+
+  // Check if any filtered DataFrame is empty, return (0, 0, 0) for sum amounts
+  if (filteredDF1.isEmpty || filteredDF2.isEmpty) {
     return (0.0, 0.0, 0.0)
   }
 
   // Calculate the sum of AMOUNT_USD, AMOUNT_CHF, AMOUNT_GBP columns for the filtered rows
-  val sumAmountUSD = filteredDF.agg(sum("AMOUNT_USD")).collect()(0).getDouble(0)
-  val sumAmountCHF = filteredDF.agg(sum("AMOUNT_CHF")).collect()(0).getDouble(0)
-  val sumAmountGBP = filteredDF.agg(sum("AMOUNT_GBP")).collect()(0).getDouble(0)
+  val sumAmountUSD = if (filteredDF1.agg(sum("AMOUNT_USD")).head.isNullAt(0)) 0.0 else filteredDF1.agg(sum("AMOUNT_USD")).head.getDouble(0)
+  val sumAmountCHF = if (filteredDF1.agg(sum("AMOUNT_CHF")).head.isNullAt(0)) 0.0 else filteredDF1.agg(sum("AMOUNT_CHF")).head.getDouble(0)
+  val sumAmountGBP = if (filteredDF1.agg(sum("AMOUNT_GBP")).head.isNullAt(0)) 0.0 else filteredDF1.agg(sum("AMOUNT_GBP")).head.getDouble(0)
 
-  (sumAmountUSD, sumAmountCHF, sumAmountGBP)
+  val sumAmountUSD2 = if (filteredDF2.agg(sum("AMOUNT_USD")).head.isNullAt(0)) 0.0 else filteredDF2.agg(sum("AMOUNT_USD")).head.getDouble(0)
+  val sumAmountCHF2 = if (filteredDF2.agg(sum("AMOUNT_CHF")).head.isNullAt(0)) 0.0 else filteredDF2.agg(sum("AMOUNT_CHF")).head.getDouble(0)
+  val sumAmountGBP2 = if (filteredDF2.agg(sum("AMOUNT_GBP")).head.isNullAt(0)) 0.0 else filteredDF2.agg(sum("AMOUNT_GBP")).head.getDouble(0)
+
+  // Return the sum of amounts for both conditions
+  (sumAmountUSD + sumAmountUSD2, sumAmountCHF + sumAmountCHF2, sumAmountGBP + sumAmountGBP2)
 }
 
-// Assuming 'spark' is your SparkSession and 'yourDataFrame' is your DataFrame
+// Assuming 'spark' is your SparkSession and 'yourDataFrame' is the DataFrame
 val spark = SparkSession.builder()
   .appName("CalculateSumAmountsExample")
   .getOrCreate()
@@ -30,8 +42,10 @@ val spark = SparkSession.builder()
 // Assuming 'yourDataFrame' is the DataFrame you mentioned
 val yourDataFrame = ???
 
-// Calculate the sum of AMOUNT_USD, AMOUNT_CHF, AMOUNT_GBP columns based on the specified criteria
-val (sumUSD, sumCHF, sumGBP) = calculateSumAmounts(yourDataFrame)
+val yearValue = "2023" // Define the year value
+
+// Calculate the sum of AMOUNT_USD, AMOUNT_CHF, AMOUNT_GBP columns based on the specified criteria and year
+val (sumUSD, sumCHF, sumGBP) = calculateSumAmounts(yourDataFrame, yearValue)
 
 // Display the calculated sums
 println(s"The sum of AMOUNT_USD for the filtered rows is: $sumUSD")
