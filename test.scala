@@ -1,6 +1,14 @@
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
 
+// Get the current month as an integer (1 to 12)
+val currentMonth = LocalDate.now().getMonthValue
+
+// Calculate the quarter based on the current month
+val currentQuarter = (currentMonth - 1) / 3 + 1
+
+println(s"The current quarter is: $currentQuarter")
+
 // Create a function to perform the required operations
 def calculateSumAmounts(dataFrame: DataFrame, year: String): (Double, Double, Double) = {
   val filteredDF1 = dataFrame
