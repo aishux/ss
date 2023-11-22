@@ -1,11 +1,20 @@
-import org.apache.spark.sql.functions._
+import java.time.LocalDate
+import java.time.DayOfWeek
+import java.time.format.DateTimeFormatter
 
-// Assuming `timeDf` is a DataFrame
+// Get the current date
+val currentDate = LocalDate.now()
 
-// Filtering based on conditions
-val filteredDF = timeDf
-  .filter(col("QQ") === 4)
-  .filter(to_date(col("ext_tim_ident"), "yyyyMMdd").cast("string") <= "2023-11-24")
+// Get the day of the week (e.g., Monday to Sunday -> 1 to 7)
+val currentDayOfWeek = currentDate.getDayOfWeek().getValue()
 
-// Displaying the filtered DataFrame
-filteredDF.show()
+// Calculate the number of days until the end of the week (Sunday)
+val daysUntilEndOfWeek = DayOfWeek.SUNDAY.getValue() - currentDayOfWeek
+
+// Calculate the last date of the current week
+val lastDateOfCurrentWeek = currentDate.plusDays(daysUntilEndOfWeek)
+
+// Format the last date of the current week to YYYYMMDD
+val formattedDate = lastDateOfCurrentWeek.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+
+println(formattedDate) // Output: YYYYMMDD format of the last date of the current week
