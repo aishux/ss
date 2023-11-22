@@ -1,88 +1,27 @@
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
 
-// Get the current month as an integer (1 to 12)
-val currentMonth = LocalDate.now().getMonthValue
-
-// Calculate the quarter based on the current month
-val currentQuarter = (currentMonth - 1) / 3 + 1
-println(s"The current quarter is: $currentQuarter")
-
-val distinctExtMsrIdent = yourDataFrame.select("EXT_MSR_IDENT").distinct().as[String].collect()
-
-
-
-// Create a function to perform the required operations
-def calculateSumAmounts(dataFrame: DataFrame, year: String): (Double, Double, Double) = {
-  val filteredDF1 = dataFrame
-    .filter(col("EXT_MSR_IDENT") === "CA123")
-    .filter(col("EXT_TIM_DETAIL").like("%" + year + "%")) // Use the 'year' variable in the filter
-    .filter(col("EXT_TVT_IDENT") === "M")
-    .filter(col("QQ") < 4)
-
-  val filteredDF2 = dataFrame
-    .filter(col("EXT_MSR_IDENT") === "CA123")
-    .filter(col("EXT_TIM_DETAIL").like("%" + year + "%")) // Use the 'year' variable in the filter
-    .filter(col("EXT_TVT_IDENT") === "W")
-    .filter(col("QQ") === 4)
-    .filter(col("EXT_TIM_IDENT") <= s"$year-11-14") // Use the 'year' variable in the filter
-
-  // Check if any filtered DataFrame is empty, return (0, 0, 0) for sum amounts
-  if (filteredDF1.isEmpty || filteredDF2.isEmpty) {
-    return (0.0, 0.0, 0.0)
-  }
-
-  // Calculate the sum of AMOUNT_USD, AMOUNT_CHF, AMOUNT_GBP columns for the filtered rows
-  val sumAmountUSD = if (filteredDF1.agg(sum("AMOUNT_USD")).head.isNullAt(0)) 0.0 else filteredDF1.agg(sum("AMOUNT_USD")).head.getDouble(0)
-  val sumAmountCHF = if (filteredDF1.agg(sum("AMOUNT_CHF")).head.isNullAt(0)) 0.0 else filteredDF1.agg(sum("AMOUNT_CHF")).head.getDouble(0)
-  val sumAmountGBP = if (filteredDF1.agg(sum("AMOUNT_GBP")).head.isNullAt(0)) 0.0 else filteredDF1.agg(sum("AMOUNT_GBP")).head.getDouble(0)
-
-  val sumAmountUSD2 = if (filteredDF2.agg(sum("AMOUNT_USD")).head.isNullAt(0)) 0.0 else filteredDF2.agg(sum("AMOUNT_USD")).head.getDouble(0)
-  val sumAmountCHF2 = if (filteredDF2.agg(sum("AMOUNT_CHF")).head.isNullAt(0)) 0.0 else filteredDF2.agg(sum("AMOUNT_CHF")).head.getDouble(0)
-  val sumAmountGBP2 = if (filteredDF2.agg(sum("AMOUNT_GBP")).head.isNullAt(0)) 0.0 else filteredDF2.agg(sum("AMOUNT_GBP")).head.getDouble(0)
-
-  // Return the sum of amounts for both conditions
-  (sumAmountUSD + sumAmountUSD2, sumAmountCHF + sumAmountCHF2, sumAmountGBP + sumAmountGBP2)
-}
-
-
-
-// Loop through each distinct EXT_MSR_IDENT value
-var resultsList = List[(String, Int, Double, Double, Double)]()
-for (extMsrIdent <- distinctExtMsrIdent) {
-  val currentMonth = java.time.LocalDate.now().getMonthValue
-  val currentQuarter = (currentMonth - 1) / 3 + 1
-  
-  // Calculate the sums for the current EXT_MSR_IDENT
-  val (sumUSD, sumCHF, sumGBP) = calculateSumAmounts(yourDataFrame, extMsrIdent, yearValue, currentQuarter)
-
-  // Store the results in the list
-  resultsList :+= (extMsrIdent, currentQuarter, sumUSD, sumCHF, sumGBP)
-}
-
-// Convert the results list to a DataFrame
-import spark.implicits._
-val resultsDF = resultsList.toDF("EXT_MSR_IDENT", "currentQuarter", "AmountUSD", "AmountCHF", "AmountGBP")
-
-// Show the results DataFrame
-resultsDF.show()
-
-
-
-// Assuming 'spark' is your SparkSession and 'yourDataFrame' is the DataFrame
+// Assuming 'spark' is your SparkSession
 val spark = SparkSession.builder()
-  .appName("CalculateSumAmountsExample")
+  .appName("JoinAndReplaceExample")
   .getOrCreate()
 
-// Assuming 'yourDataFrame' is the DataFrame you mentioned
-val yourDataFrame = ???
+// Assuming 'timeDf' and 'resultsDF' are your DataFrames
+val timeDf: DataFrame = ??? // Replace ??? with your timeDf DataFrame
+val resultsDF: DataFrame = ??? // Replace ??? with your resultsDF DataFrame
 
-val yearValue = "2023" // Define the year value
+// Join timeDf and resultsDF based on EXT_MSR_IDENT and EXT_TIM_IDENT columns
+val joinedDF = timeDf.join(resultsDF,
+  Seq("EXT_MSR_IDENT", "EXT_TIM_IDENT"),
+  "left_outer"
+)
 
-// Calculate the sum of AMOUNT_USD, AMOUNT_CHF, AMOUNT_GBP columns based on the specified criteria and year
-val (sumUSD, sumCHF, sumGBP) = calculateSumAmounts(yourDataFrame, yearValue)
+// Replace Amount_USD, Amount_CHF, Amount_GBP columns in timeDf with columns from resultsDF
+val updatedTimeDf = joinedDF
+  .withColumn("Amount_USD", coalesce(col("AmountUSD"), col("Amount_USD")))
+  .withColumn("Amount_CHF", coalesce(col("AmountCHF"), col("Amount_CHF")))
+  .withColumn("Amount_GBP", coalesce(col("AmountGBP"), col("Amount_GBP")))
+  .drop("AmountUSD", "AmountCHF", "AmountGBP")
 
-// Display the calculated sums
-println(s"The sum of AMOUNT_USD for the filtered rows is: $sumUSD")
-println(s"The sum of AMOUNT_CHF for the filtered rows is: $sumCHF")
-println(s"The sum of AMOUNT_GBP for the filtered rows is: $sumGBP")
+// Show the updated timeDf DataFrame
+updatedTimeDf.show()
