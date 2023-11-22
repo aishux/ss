@@ -6,8 +6,11 @@ val currentMonth = LocalDate.now().getMonthValue
 
 // Calculate the quarter based on the current month
 val currentQuarter = (currentMonth - 1) / 3 + 1
-
 println(s"The current quarter is: $currentQuarter")
+
+val distinctExtMsrIdent = yourDataFrame.select("EXT_MSR_IDENT").distinct().as[String].collect()
+
+
 
 // Create a function to perform the required operations
 def calculateSumAmounts(dataFrame: DataFrame, year: String): (Double, Double, Double) = {
