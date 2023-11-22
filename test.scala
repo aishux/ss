@@ -9,6 +9,11 @@ def calculateSumAmounts(dataFrame: DataFrame): (Double, Double, Double) = {
     .filter(col("EXT_TVT_IDENT") === "M")
     .filter(col("QQ") < 4)
 
+  // Check if QQ = 0, if so, return (0, 0, 0) for sum amounts
+  if (filteredDF.filter(col("QQ") === 0).count() > 0) {
+    return (0.0, 0.0, 0.0)
+  }
+
   // Calculate the sum of AMOUNT_USD, AMOUNT_CHF, AMOUNT_GBP columns for the filtered rows
   val sumAmountUSD = filteredDF.agg(sum("AMOUNT_USD")).collect()(0).getDouble(0)
   val sumAmountCHF = filteredDF.agg(sum("AMOUNT_CHF")).collect()(0).getDouble(0)
