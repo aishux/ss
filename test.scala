@@ -1,21 +1,15 @@
-import org.apache.spark.sql.functions._
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-val timeDetailDf: DataFrame = ??? // Replace ??? with your timeDetailDf DataFrame
-val resultsDF: DataFrame = ??? // Replace ??? with your resultsDF DataFrame
+// Get the current date
+val currentDate = LocalDate.now()
 
-val joinedDF = timeDetailDf.join(
-  resultsDF
-    .withColumn("formatted_EXT_TIM_IDENT", date_format(col("current_EXT_TIM_IDENT"), "yyyyMMdd")),
-  timeDetailDf("EXT_MSR_IDENT") === resultsDF("current_EXT_MSR_IDENT") &&
-    timeDetailDf("EXT_TIM_IDENT") === col("formatted_EXT_TIM_IDENT"),
-  "left_outer"
-)
+// Get the last day of the current month
+val lastDayOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
 
-val updatedTimeDetailDf = joinedDF
-  .withColumn("YTD_USD", coalesce(resultsDF("AmountUSD"), timeDetailDf("YTD_USD")))
-  .withColumn("YTD_EUR", coalesce(resultsDF("AmountEUR"), timeDetailDf("YTD_EUR")))
-  .withColumn("YTD_GBP", coalesce(resultsDF("AmountGBP"), timeDetailDf("YTD_GBP")))
-  .withColumn("YTD_CHF", coalesce(resultsDF("AmountCHF"), timeDetailDf("YTD_CHF")))
-  .drop("AmountUSD", "AmountEUR", "AmountGBP", "AmountCHF", "formatted_EXT_TIM_IDENT")
+// Format the last day of the current month to yyyymmdd format
+val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+val formattedLastDay = lastDayOfMonth.format(formatter)
 
-updatedTimeDetailDf.show()
+// Print the formatted last day of the current month
+println(s"The last day of the current month in yyyymmdd format is: $formattedLastDay")
