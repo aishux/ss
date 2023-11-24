@@ -1,15 +1,20 @@
+import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.functions._
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-// Get the current date
+// Assuming 'spark' is your SparkSession and 'inputDF' is your DataFrame
+val spark: SparkSession = ??? // Replace ??? with your SparkSession
+val inputDF: DataFrame = ??? // Replace ??? with your input DataFrame
+
+// Get the current month's last date in the format 'yyyyMMdd'
 val currentDate = LocalDate.now()
-
-// Get the last day of the current month
 val lastDayOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
+val formattedLastDayOfMonth = lastDayOfMonth.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
 
-// Format the last day of the current month to yyyymmdd format
-val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-val formattedLastDay = lastDayOfMonth.format(formatter)
+// Define a new DataFrame by updating 'AMOUNT_USD' column based on the condition
+val outputDF = inputDF
+  .withColumn("AMOUNT_USD", when(col("EXT_TIM_IDENT") === formattedLastDayOfMonth, col("YTD_USD") - col("AMOUNT_USD")).otherwise(col("AMOUNT_USD"))
+  )
 
-// Print the formatted last day of the current month
-println(s"The last day of the current month in yyyymmdd format is: $formattedLastDay")
+outputDF.show()
