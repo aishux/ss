@@ -16,14 +16,14 @@ val df = data.toDF(columns: _*)
 // Convert 'EXT_TIM_IDENT' to DateType
 val formattedDF = df.withColumn("EXT_TIM_IDENT", to_date($"EXT_TIM_IDENT".cast("string"), "yyyyMMdd"))
 
-// Filter data where 'EXT_TVT_IDENT' = 'M'
-val filteredDF = formattedDF.filter($"EXT_TVT_IDENT" === "M")
+// Filter data where 'EXT_TVT_IDENT' = 'M' and 'EXT_TIM_IDENT' like '%2023%'
+val filteredDF = formattedDF.filter($"EXT_TVT_IDENT" === "M" && $"EXT_TIM_IDENT".like("%2023%"))
 
-// Define Window specification
-val windowSpec = Window.partitionBy("EXT_MSR_IDENT", "EXT_TIM_IDENT").orderBy("EXT_TIM_IDENT").rowsBetween(Window.unboundedPreceding, Window.currentRow)
+// Define Window specification partitioned by 'EXT_MSR_IDENT' and 'QQ'
+val windowSpec = Window.partitionBy("EXT_MSR_IDENT", "QQ").orderBy("EXT_TIM_IDENT")
 
-// Create a new column with the running total
-val resultDF = filteredDF.withColumn("TOTAL_CURR_AMOUNT_USD", sum("AMOUNT_USD").over(windowSpec))
+// Create a new column with the running total for each 'QQ' partition
+val resultDF = filteredDF.withColumn("TOTAL_WEEK_AMOUNT_USD", sum("AMOUNT_USD").over(windowSpec))
 
 // Show the resulting DataFrame
 resultDF.show()
