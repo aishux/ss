@@ -1,6 +1,5 @@
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.expressions.Window
 
 // Create a SparkSession
 val spark = SparkSession.builder()
@@ -25,11 +24,15 @@ val df = data.toDF("EXT_MSR_IDENT", "EXT_TIM_IDENT", "EXT_TVT_IDENT", "AMOUNT_US
 val dateFormat = "yyyyMMdd"
 val dfFormatted = df.withColumn("EXT_TIM_IDENT", to_date($"EXT_TIM_IDENT", dateFormat))
 
-// Define a Window specification partitioned by 'EXT_MSR_IDENT' and ordered by 'EXT_TIM_IDENT'
-val windowSpec = Window.partitionBy("EXT_MSR_IDENT").orderBy("EXT_TIM_IDENT")
+// Self-join to calculate cumulative sum
+val cumulativeSumDF = dfFormatted.as("df1")
+  .join(
+    dfFormatted.as("df2"),
+    ($"df1.EXT_MSR_IDENT" === $"df2.EXT_MSR_IDENT") && ($"df1.EXT_TIM_IDENT" >= $"df2.EXT_TIM_IDENT"),
+    "left_outer"
+  )
+  .groupBy($"df1.EXT_MSR_IDENT", $"df1.EXT_TIM_IDENT", $"df1.EXT_TVT_IDENT", $"df1.AMOUNT_USD")
+  .agg(sum($"df2.AMOUNT_USD").alias("TOTAL_USD_CURR_MONTH"))
+  .orderBy($"df1.EXT_MSR_IDENT", $"df1.EXT_TIM_IDENT")
 
-// Calculate cumulative sum using window functions
-val result = dfFormatted
-  .withColumn("TOTAL_USD_CURR_MONTH", sum("AMOUNT_USD").over(windowSpec))
-
-result.show()
+cumulativeSumDF.show()
