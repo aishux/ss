@@ -1,33 +1,29 @@
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.DataFrame
 
-// Create a SparkSession
-val spark = SparkSession.builder()
-  .appName("Calculate Cumulative Sum")
-  .master("local[*]")
-  .getOrCreate()
-
-import spark.implicits._
-
-// Sample DataFrame
+// Sample DataFrame creation (replace this with your actual DataFrame)
 val data = Seq(
-  ("ABC", "20230131", "M", 10),
-  ("ABC", "20230228", "M", 10),
-  // Add other rows here
-  ("XYZ", "20231130", "M", 20),
-  ("XYZ", "20231231", "M", 20)
+  ("ABC", 20230131, "M", 1, 10),
+  // ... (insert the rest of your data)
+  ("XYZ", 20231124, "W", 4, 5)
 )
 
-val df = data.toDF("EXT_MSR_IDENT", "EXT_TIM_IDENT", "EXT_TVT_IDENT", "AMOUNT_USD")
+val columns = Seq("EXT_MSR_IDENT", "EXT_TIM_IDENT", "EXT_TVT_IDENT", "QQ", "AMOUNT_USD")
 
-// Convert 'EXT_TIM_IDENT' column to date type
-val dateFormat = "yyyyMMdd"
-val dfFormatted = df.withColumn("EXT_TIM_IDENT", to_date($"EXT_TIM_IDENT", dateFormat))
+val df = data.toDF(columns: _*)
 
-// Group by 'EXT_MSR_IDENT' and 'EXT_TVT_IDENT' and calculate cumulative sum
-val windowSpec = Window.partitionBy("EXT_MSR_IDENT", "EXT_TVT_IDENT").orderBy("EXT_TIM_IDENT")
-val cumulativeSumDF = dfFormatted
-  .withColumn("TOTAL_USD_CURR_MONTH", sum("AMOUNT_USD").over(windowSpec))
+// Convert 'EXT_TIM_IDENT' to DateType
+val formattedDF = df.withColumn("EXT_TIM_IDENT", to_date($"EXT_TIM_IDENT".cast("string"), "yyyyMMdd"))
 
-// Display cumulativeSumDF with filters
-display(cumulativeSumDF.filter($"EXT_TVT_IDENT" === "M" && $"EXT_MSR_IDENT" === "ABC"))
+// Filter data where 'EXT_TVT_IDENT' = 'M'
+val filteredDF = formattedDF.filter($"EXT_TVT_IDENT" === "M")
+
+// Define Window specification
+val windowSpec = Window.partitionBy("EXT_MSR_IDENT", "EXT_TIM_IDENT").orderBy("EXT_TIM_IDENT").rowsBetween(Window.unboundedPreceding, Window.currentRow)
+
+// Create a new column with the running total
+val resultDF = filteredDF.withColumn("TOTAL_CURR_AMOUNT_USD", sum("AMOUNT_USD").over(windowSpec))
+
+// Show the resulting DataFrame
+resultDF.show()
