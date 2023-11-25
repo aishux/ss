@@ -1,20 +1,30 @@
-import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions._
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import org.apache.spark.sql.{SparkSession, functions}
+import org.apache.spark.sql.expressions.Window
 
-// Assuming 'spark' is your SparkSession and 'inputDF' is your DataFrame
-val spark: SparkSession = ??? // Replace ??? with your SparkSession
-val inputDF: DataFrame = ??? // Replace ??? with your input DataFrame
+// Create a SparkSession
+val spark = SparkSession.builder()
+  .appName("Calculate Total USD")
+  .master("local[*]")
+  .getOrCreate()
 
-// Get the current month's last date in the format 'yyyyMMdd'
-val currentDate = LocalDate.now()
-val lastDayOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
-val formattedLastDayOfMonth = lastDayOfMonth.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+// Sample data
+val data = Seq(
+  ("ABC", 20230131, "M", 10),
+  // ... (your complete dataset)
+  ("XYZ", 20231231, "M", 20)
+)
 
-// Define a new DataFrame by updating 'AMOUNT_USD' column based on the condition
-val outputDF = inputDF
-  .withColumn("AMOUNT_USD", when(col("EXT_TIM_IDENT") === formattedLastDayOfMonth, col("YTD_USD") - col("AMOUNT_USD")).otherwise(col("AMOUNT_USD"))
-  )
+import spark.implicits._
 
-outputDF.show()
+// Create a DataFrame from the provided data
+val df = data.toDF("EXT_MSR_IDENT", "EXT_TIM_IDENT", "EXT_TVT_IDENT", "AMOUNT_USD")
+  .withColumn("EXT_TIM_IDENT", $"EXT_TIM_IDENT".cast("int"))
+
+// Calculate the total USD for each EXT_MSR_IDENT up to the current month
+val windowSpec = Window.partitionBy("EXT_MSR_IDENT").orderBy("EXT_TIM_IDENT").rowsBetween(Window.unboundedPreceding, Window.currentRow)
+
+val result = df
+  .withColumn("TOTAL_USD_CURR_MONTH", functions.sum($"AMOUNT_USD").over(windowSpec))
+  .orderBy("EXT_MSR_IDENT", "EXT_TIM_IDENT")
+
+result.show()
