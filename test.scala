@@ -35,4 +35,5 @@ val cumulativeSumDF = dfFormatted.as("df1")
   .agg(sum($"df2.AMOUNT_USD").alias("TOTAL_USD_CURR_MONTH"))
   .orderBy($"df1.EXT_MSR_IDENT", $"df1.EXT_TIM_IDENT")
 
-cumulativeSumDF.show()
+// Display cumulativeSumDF with filters
+display(cumulativeSumDF.filter($"EXT_TVT_IDENT" === "M" && $"EXT_MSR_IDENT" === "ABC"))
