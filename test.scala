@@ -1,29 +1,16 @@
-import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.DataFrame
 
-// Assuming 'df' is your DataFrame containing the provided data
+// Assuming 'inputDF' is your DataFrame containing the provided data
 
-val windowSpec = Window.partitionBy("EXT_MSR_IDENT").orderBy("EXT_TIM_IDENT")
+val quarter = 4
+val QQ_MINUS_1 = 3
 
-val resultDF = df
-  .withColumn("QQ_minus_1", when(col("EXT_TIM_IDENT") === last_day_of_current_month, col("QQ") - 1))
-  .withColumn("max_date_QQ_minus_1",
-    when(col("EXT_TIM_IDENT") === last_day_of_current_month && col("QQ_minus_1").isNotNull,
-      max(when(col("QQ") === col("QQ_minus_1"), col("EXT_TIM_IDENT"))).over(windowSpec))
-  )
-  .withColumn("YTD_USD",
-    when(col("EXT_TIM_IDENT") === last_day_of_current_week, col("TOTAL_WEEK_AMOUNT_USD"))
-      .otherwise(lit(0))
-    +
-    when(
-      col("EXT_TIM_IDENT") === last_day_of_current_month,
-      when(col("QQ") > 1,
-        coalesce(
-          when(col("EXT_TIM_IDENT") === col("max_date_QQ_minus_1"), col("TOTAL_MONTH_AMOUNT_USD")),
-          lit(0)
-        )
-      ).otherwise(lit(0))
-    )
-  )
-  .withColumn("YTD_USD", when(col("EXT_TIM_IDENT") === last_day_of_current_month, col("YTD_USD")).otherwise(lit(0)))
-  .drop("QQ_minus_1", "max_date_QQ_minus_1")
+// Calculate the maximum date when QQ_MINUS_1 matches EXT_TVT_IDENT using when and withColumn
+val resultDF = inputDF.withColumn(
+  "max_date",
+  when(col("QQ") === QQ_MINUS_1 && col("EXT_TVT_IDENT") === quarter, max("EXT_TIM_IDENT").over())
+    .otherwise(null) // Set to null if conditions are not met
+)
+
+resultDF.show() // Display the DataFrame with the new 'max_date' column
