@@ -17,10 +17,12 @@ val resultDF = df
     +
     when(
       col("EXT_TIM_IDENT") === last_day_of_current_month,
-      coalesce(
-        when(col("EXT_TIM_IDENT") === col("max_date_QQ_minus_1"), col("TOTAL_MONTH_AMOUNT_USD")),
-        lit(0)
-      )
+      when(col("QQ") > 1,
+        coalesce(
+          when(col("EXT_TIM_IDENT") === col("max_date_QQ_minus_1"), col("TOTAL_MONTH_AMOUNT_USD")),
+          lit(0)
+        )
+      ).otherwise(lit(0))
     )
   )
   .withColumn("YTD_USD", when(col("EXT_TIM_IDENT") === last_day_of_current_month, col("YTD_USD")).otherwise(lit(0)))
