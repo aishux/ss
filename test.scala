@@ -1,18 +1,27 @@
-import org.apache.spark.sql.{SparkSession, DataFrame}
+import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.functions._
 
-// Create SparkSession
-val spark = SparkSession.builder().appName("DataFrame Merge").getOrCreate()
+// Assuming 'df' is your DataFrame containing the provided data
 
-// Assuming you have df1 and df2 DataFrames with the given columns
+val windowSpec = Window.partitionBy("EXT_MSR_IDENT").orderBy("EXT_TIM_IDENT")
 
-// Perform an outer join without specifying columns
-val commonColumns = df1.columns.toSet.intersect(df2.columns.toSet).map(col).toSeq
-val mergedDf: DataFrame = df1.select(commonColumns: _*).union(df2.select(commonColumns: _*)).distinct()
-
-// Order the resulting DataFrame by a specific column or list of columns
-val orderByColumns = Seq("A", "B") // Replace with the column(s) you want to order by
-val orderedMergedDf = mergedDf.orderBy(orderByColumns.map(col): _*)
-
-// Show the resulting ordered DataFrame
-orderedMergedDf.show()
-
+val resultDF = df
+  .withColumn("QQ_minus_1", when(col("EXT_TIM_IDENT") === last_day_of_current_month, col("QQ") - 1))
+  .withColumn("max_date_QQ_minus_1",
+    when(col("EXT_TIM_IDENT") === last_day_of_current_month && col("QQ_minus_1").isNotNull,
+      max(when(col("QQ") === col("QQ_minus_1"), col("EXT_TIM_IDENT"))).over(windowSpec))
+  )
+  .withColumn("YTD_USD",
+    when(col("EXT_TIM_IDENT") === last_day_of_current_week, col("TOTAL_WEEK_AMOUNT_USD"))
+      .otherwise(lit(0))
+    +
+    when(
+      col("EXT_TIM_IDENT") === last_day_of_current_month,
+      coalesce(
+        when(col("EXT_TIM_IDENT") === col("max_date_QQ_minus_1"), col("TOTAL_MONTH_AMOUNT_USD")),
+        lit(0)
+      )
+    )
+  )
+  .withColumn("YTD_USD", when(col("EXT_TIM_IDENT") === last_day_of_current_month, col("YTD_USD")).otherwise(lit(0)))
+  .drop("QQ_minus_1", "max_date_QQ_minus_1")
