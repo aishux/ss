@@ -7,9 +7,12 @@ val windowSpec = Window.partitionBy("ID")
 
 val updatedDf = mergedDf.withColumn("QTD_USD",
   when(col("EXT_TVT_IDENT") === "M" && col("EXT_TIM_IDENT") === month_date_variable,
-    first(when(col("EXT_TVT_IDENT") === "W" && col("EXT_TIM_IDENT") === week_date_variable, col("WEEKLY_TOTAL_AMOUNT_USD")))
-      .over(windowSpec)
+    coalesce(
+      first(when(col("EXT_TVT_IDENT") === "W" && col("EXT_TIM_IDENT") === week_date_variable, col("WEEKLY_TOTAL_AMOUNT_USD")))
+        .over(windowSpec),
+      col("QTD_USD")
+    )
   ).otherwise(col("QTD_USD"))
 )
 
-updatedDf.show() // Show the updated DataFrame
+updatedDf.where(col("EXT_MSR_IDENT") === "123").show()
