@@ -1,16 +1,31 @@
-import re
-
 # Function to extract numbers and calculate their sum
 def extract_and_sum(words):
     total_sum = 0
     for word in words:
-        extracted_numbers = re.findall(r'\d+', word)  # Extract numbers using regex
-        if len(extracted_numbers) == 1:
-            num = int(extracted_numbers[0] * 2)  # Consider one number twice
-            total_sum += num
-        elif len(extracted_numbers) >= 2:
-            concatenated_numbers = ''.join(extracted_numbers)  # Concatenate multiple numbers
-            total_sum += int(concatenated_numbers)
+        left_pointer = 0
+        right_pointer = len(word) - 1
+        left_number = ''
+        right_number = ''
+
+        # Find the leftmost number
+        while left_pointer < len(word):
+            if word[left_pointer].isdigit():
+                left_number += word[left_pointer]
+                break
+            left_pointer += 1
+
+        # Find the rightmost number
+        while right_pointer >= 0:
+            if word[right_pointer].isdigit():
+                right_number = word[right_pointer] + right_number
+                break
+            right_pointer -= 1
+
+        # Concatenate and add numbers to the total sum
+        if left_number and right_number:
+            total_sum += int(left_number + right_number)
+        elif left_number:
+            total_sum += int(left_number) * 2  # Consider single number twice
 
     return total_sum
 
