@@ -1,6 +1,6 @@
 # Function to extract numbers and calculate their sum
 def extract_and_sum(words):
-    total_sum = 0
+    total_sum = ''
     for word in words:
         left_pointer = 0
         right_pointer = len(word) - 1
@@ -21,11 +21,9 @@ def extract_and_sum(words):
                 break
             right_pointer -= 1
 
-        # Concatenate and add numbers to the total sum
+        # Concatenate left and right numbers
         if left_number and right_number:
-            total_sum += int(left_number + right_number)
-        elif left_number:
-            total_sum += int(left_number) * 2  # Consider single number twice
+            total_sum += left_number + right_number
 
     return total_sum
 
@@ -35,4 +33,4 @@ with open(file_path, 'r') as file:
     words = file.read().splitlines()
 
 result = extract_and_sum(words)
-print("The sum of the extracted numbers:", result)
+print("The concatenated sum of the extracted numbers:", result)
