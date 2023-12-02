@@ -1,23 +1,32 @@
-input_data = [
-    "Game 1: 3 blue, 4 red; 2 blue 3 green; 5 red, 7 blue, 8 green",
-    "Game 2: 2 blue, 4 red; 1 blue 2 green"
-]
+red_balls = 12
+green_balls = 13
+blue_balls = 14
 
-game_data = {}
+data = {
+    'Game 1': ['4 blue, 5 red', '6 green, 7 red, 8 blue'],
+    'Game 2': ['2 blue, 5 red', '6 green, 0 red, 8 blue', '8 green, 7 blue, 2 red'],
+    'Game 3': ['1 blue, 2 blue', '6 green, 7 green, 8 red']
+}
 
-for game in input_data:
-    game_info = game.split(': ')
-    game_name = game_info[0]
-    colors_data = game_info[1].split('; ')
+keys_satisfying_criteria = []
 
-    game_data[game_name] = {}
-    for colors in colors_data:
-        color_list = colors.split(', ')
-        for color in color_list:
-            quantity, color_name = color.split(' ')
-            if color_name not in game_data[game_name]:
-                game_data[game_name][color_name] = int(quantity)
-            else:
-                game_data[game_name][color_name] += int(quantity)
+for key, sets in data.items():
+    red_total = 0
+    green_total = 0
+    blue_total = 0
 
-print(game_data)
+    for game_set in sets:
+        elements = game_set.split(', ')
+        for element in elements:
+            quantity, color = element.split(' ')
+            if color == 'red':
+                red_total += int(quantity)
+            elif color == 'green':
+                green_total += int(quantity)
+            elif color == 'blue':
+                blue_total += int(quantity)
+
+    if red_total < red_balls and green_total < green_balls and blue_total < blue_balls:
+        keys_satisfying_criteria.append(key)
+
+print("Keys satisfying the criteria:", keys_satisfying_criteria)
