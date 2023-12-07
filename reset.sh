@@ -1,24 +1,21 @@
-#!bin/bash
+#!/bin/bash
 
-LOGINUSERNAME="ad";
-PASSWORD="pwd";
-kURL="https://google.com";
-SESSIONID="";
-USERGPN=$1;
-
-getSessionIdFromServer(){
-    output=$(curl -s -X POST -H "Accept:application/JSON" -d 'username='$LOGINUSERNAME'&password'=$PASSWORD $kURL/rest/login);
-    LENTOREAD='expr ${#output} - 27';
-    SESSIONID='expr substr $output 25 $LENTOREAD';
+# JSON data as a string within the script
+json_data='
+{
+  "name": "John Doe",
+  "age": 30,
+  "email": "john@example.com",
+  "address": {
+    "street": "123 Main St",
+    "city": "Anytown",
+    "country": "USA"
+  }
 }
+'
 
-DELETE(){
-    getSessionIdFromServer
-    output=$(curl -X DELETE \
-    ''$kURL'/rest/user/'$USERGPN \ 
-    -H "Accept:application/JSON" \
-    -H sessionid:$SESIONID);
-echo "$output";
-}
+# Store the entire JSON data in a variable
+all_data="$json_data"
 
-DELETE
+# Print the entire JSON data stored in the variable
+echo "All Data: $all_data"
