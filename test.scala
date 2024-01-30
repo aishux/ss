@@ -50,3 +50,6 @@ val resultDF = record1DF.union(record2DF)
 
 // Show the resulting DataFrame
 resultDF.show(false)
+
+
+val record2Dataset = spark.createDataset(Seq(Row.fromSeq(valuesRecord2))).toDF(schema: _*)
