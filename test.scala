@@ -11,7 +11,14 @@ val spark = SparkSession.builder().appName("DatePopulation").getOrCreate()
 val schema = StructType(Seq(
   StructField("col1", StringType, true),
   StructField("col2", StringType, true),
-  StructField("col3", StringType, true),
+  // ... (continue defining the schema for your other string columns)
+  StructField("col17", StringType, true),
+  StructField("col18", StringType, true),
+  StructField("col19", StringType, true),
+  StructField("col20", StringType, true),
+  // ... (continue defining the schema for your other double columns)
+  StructField("col37", DoubleType, true),
+  StructField("col38", DoubleType, true),
   // ... (continue defining the schema for your other columns)
 ))
 
@@ -26,12 +33,16 @@ val currentYear = LocalDate.now().getYear
 
 // Get the last date of the current year
 val lastDateOfYear = LocalDate.of(currentYear, 12, 31)
-val valuesRecord1 = Seq(lastDateOfYear.format(DateTimeFormatter.ofPattern("yyyyMMdd")), "XXX", "XXX", "XXX", "XXX", "XXX", "XXX", "XXX", "XXX", "XXX")
-val record1DF = createDataFrame(valuesRecord1)
 
 // Get the last Friday's date of the current year
 val lastFridayOfYear = lastDateOfYear.with(DayOfWeek.FRIDAY)
-val valuesRecord2 = Seq(lastFridayOfYear.format(DateTimeFormatter.ofPattern("yyyyMMdd")), "XXX", "XXX", "XXX", "XXX", "XXX", "XXX", "XXX", "XXX", "XXX")
+
+// Values for 'XXX' records
+val valuesRecord1 = Seq.fill(16)("XXX") ++ Seq.fill(20)(0.0)
+val valuesRecord2 = Seq(lastFridayOfYear.format(DateTimeFormatter.ofPattern("yyyyMMdd"))) ++ Seq.fill(15)("XXX") ++ Seq.fill(20)(0.0)
+
+// Create DataFrames for the two records
+val record1DF = createDataFrame(valuesRecord1)
 val record2DF = createDataFrame(valuesRecord2)
 
 // Union the two records to create the final DataFrame
