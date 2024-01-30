@@ -1,5 +1,4 @@
 import java.time.{LocalDate, DayOfWeek, DateTimeFormatter}
-import java.time.temporal.TemporalAdjusters
 
 // Get the current year
 val currentYear = LocalDate.now().getYear
@@ -8,8 +7,8 @@ val currentYear = LocalDate.now().getYear
 val lastDayOfYear = LocalDate.of(currentYear, 12, 31)
 val formattedLastDayOfYear = lastDayOfYear.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
 
-// Get the last Friday's date of the current year
-val lastFridayOfYear = lastDayOfYear.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY))
+// Get the last Friday's date of the current year without using with
+val lastFridayOfYear = lastDayOfYear.minusDays((lastDayOfYear.getDayOfWeek.getValue + 1) % 7)
 val formattedLastFridayOfYear = lastFridayOfYear.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
 
 // Print the results
