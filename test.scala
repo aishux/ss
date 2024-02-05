@@ -7,7 +7,8 @@ def generateWeeklyData(year: Int, hierarchy_type: String): Seq[(String, String, 
   val weekFields = WeekFields.of(Locale.getDefault())
 
   (1 to firstDayOfYear.range(weekFields.weekOfWeekBasedYear()).getMaximum.toInt).map { week =>
-    val weekStartDate = firstDayOfYear.`with`(weekFields.weekOfWeekBasedYear(), week.toLong).`with`(DayOfWeek.MONDAY)
+    //val weekStartDate = firstDayOfYear.`with`(weekFields.weekOfWeekBasedYear(), week.toLong).`with`(DayOfWeek.MONDAY)
+    val weekStartDate = firstDayOfYear.`with`(weekFields.weekOfWeekBasedYear(), week.toLong).`with`(weekFields.dayOfWeek(), 1)
     val weekEndDate = weekStartDate.plusDays(4)  // Set to Friday
     val weekNumber = f"$week%02d"
     val weekDesc = s"$year $weekNumber"
