@@ -1,24 +1,22 @@
-import java.time.{LocalDate, DayOfWeek}
+import java.time.{LocalDate, DayOfWeek, WeekFields, DateTimeFormatter}
+import java.util.Locale
 
-def getFridaysInCurrentYear(): Seq[LocalDate] = {
-  val currentYear = LocalDate.now().getYear
+def generateWeeklyData(year: Int, hierarchy_type: String): Seq[(String, String, String, String, String, String, String, String, String, String, String)] = {
+  val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+  val firstDayOfYear = LocalDate.of(year, 1, 1)
+  val weekFields = WeekFields.of(Locale.getDefault())
 
-  val startDate = LocalDate.of(currentYear, 1, 1)
-  val endDate = LocalDate.of(currentYear, 12, 31)
+  (1 to firstDayOfYear.range(weekFields.weekOfWeekBasedYear()).getMaximum.toInt).map { week =>
+    val weekStartDate = firstDayOfYear.`with`(weekFields.weekOfWeekBasedYear(), week.toLong)
+    val weekEndDate = weekStartDate.`with`(DayOfWeek.FRIDAY)
+    val weekNumber = f"$week%02d"
+    val weekDesc = s"$year $weekNumber"
 
-  var currentDate = startDate
-  var fridays = Seq[LocalDate]()
-
-  while (currentDate.isBefore(endDate) || currentDate.isEqual(endDate)) {
-    if (currentDate.getDayOfWeek == DayOfWeek.FRIDAY) {
-      fridays = fridays :+ currentDate
-    }
-    currentDate = currentDate.plusDays(1)
+    ("WEEKLY", "Weekly Periods", "0", s"W_$year", s"$year", weekEndDate.format(formatter), weekDesc, "0", "W", hierarchy_type)
   }
-
-  fridays
 }
 
-// Call the function and print the result
-val fridaysInCurrentYear = getFridaysInCurrentYear()
-fridaysInCurrentYear.foreach(println)
+val lastYear = LocalDate.now().getYear - 1
+
+val result = generateWeeklyData(lastYear, "kyvos_gwm_pc")
+result.foreach(println)
