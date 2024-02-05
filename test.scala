@@ -7,8 +7,8 @@ def generateWeeklyData(year: Int, hierarchy_type: String): Seq[(String, String, 
   val weekFields = WeekFields.of(Locale.getDefault())
 
   (1 to firstDayOfYear.range(weekFields.weekOfWeekBasedYear()).getMaximum.toInt).map { week =>
-    val weekStartDate = firstDayOfYear.`with`(weekFields.weekOfWeekBasedYear(), week.toLong)
-    val weekEndDate = weekStartDate.`with`(DayOfWeek.FRIDAY)
+    val weekStartDate = firstDayOfYear.`with`(weekFields.weekOfWeekBasedYear(), week.toLong).`with`(DayOfWeek.MONDAY)
+    val weekEndDate = weekStartDate.plusDays(4)  // Set to Friday
     val weekNumber = f"$week%02d"
     val weekDesc = s"$year $weekNumber"
 
@@ -16,7 +16,7 @@ def generateWeeklyData(year: Int, hierarchy_type: String): Seq[(String, String, 
   }
 }
 
-val lastYear = LocalDate.now().getYear - 1
+val currentYear = LocalDate.now().getYear
 
-val result = generateWeeklyData(lastYear, "kyvos_gwm_pc")
+val result = generateWeeklyData(currentYear, "kyvos_gwm_pc")
 result.foreach(println)
