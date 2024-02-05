@@ -1,16 +1,20 @@
-import java.time.{LocalDate, DayOfWeek, DateTimeFormatter}
+import java.time.{LocalDate, DayOfWeek}
 
-// Get the current year
-val currentYear = LocalDate.now().getYear
+def printFridaysInCurrentYear(): Unit = {
+  val currentYear = LocalDate.now().getYear
 
-// Get the last day of the current year
-val lastDayOfYear = LocalDate.of(currentYear, 12, 31)
-val formattedLastDayOfYear = lastDayOfYear.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+  val startDate = LocalDate.of(currentYear, 1, 1)
+  val endDate = LocalDate.of(currentYear, 12, 31)
 
-// Get the last Friday's date of the current year without using with
-val lastFridayOfYear = lastDayOfYear.minusDays((lastDayOfYear.getDayOfWeek.getValue + 1) % 7)
-val formattedLastFridayOfYear = lastFridayOfYear.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+  var currentDate = startDate
 
-// Print the results
-println(s"Last day of current year: $formattedLastDayOfYear")
-println(s"Last Friday of current year: $formattedLastFridayOfYear")
+  while (currentDate.isBefore(endDate) || currentDate.isEqual(endDate)) {
+    if (currentDate.getDayOfWeek == DayOfWeek.FRIDAY) {
+      println(currentDate)
+    }
+    currentDate = currentDate.plusDays(1)
+  }
+}
+
+// Call the function
+printFridaysInCurrentYear()
