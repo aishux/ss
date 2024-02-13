@@ -1,10 +1,12 @@
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.expressions.Window
-
-// Define the Window specification
-val windowSpec = Window.partitionBy("CC", "MSR")
+import org.apache.spark.sql.functions.{col, expr}
 
 // Assuming df is your DataFrame
-val resultDF = df.withColumn("Z", max(col("A")).over(windowSpec)).filter(col("DATE") === "20241231")
+val dfWithIntMonth = df.withColumn("month_number_int", col("month_number").cast("int"))
 
-resultDF.show()
+// Remove leading zeros from the integer month column
+val dfCleanedMonth = dfWithIntMonth.withColumn("month_number_int", expr("lpad(month_number_int, 2, '0')"))
+
+// If you prefer using regexp_replace:
+// val dfCleanedMonth = dfWithIntMonth.withColumn("month_number_int", expr("regexp_replace(month_number_int, '^0+', '')"))
+
+dfCleanedMonth.show()
