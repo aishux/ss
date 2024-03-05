@@ -1,2 +1,2 @@
-SELECT DATE_FORMAT(STR_TO_DATE(date_column, '%Y%m%d'), '%Y%m %b') AS formatted_date
+SELECT TO_CHAR(TO_TIMESTAMP(EXT_TIM_IDENT, 'YYYYMMDD'), 'YYYYMM Mon') AS formatted_date
 FROM your_table;
