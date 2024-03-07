@@ -1,6 +1,8 @@
--- Update the original table with unique values
+-- Update the original table with unique values within each row
 UPDATE test
-SET A = (
-    SELECT CONCAT_WS(';', COLLECT_SET(UniqueValue))
-    FROM TempUniqueValues
+SET columnB = (
+    SELECT CONCAT_WS(';', ARRAY_JOIN(ARRAY_DISTINCT(SPLIT(columnB, ';')), ';'))
 );
+
+-- Display the updated table
+SELECT * FROM test;
