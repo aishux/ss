@@ -1,5 +1,5 @@
-SELECT STRING_AGG(DISTINCT email, ';') AS VU1_EMAILS
+SELECT concat_ws(';', collect_set(email)) AS VU1_EMAILS
 FROM (
-    SELECT TRIM(VALUE) AS email 
-    FROM STRING_SPLIT((SELECT VU1_EMAILS FROM your_table), ';')
+    SELECT explode(split(VU1_EMAILS, ';')) AS email
+    FROM your_table
 ) AS emails;
