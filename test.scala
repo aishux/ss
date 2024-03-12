@@ -1,8 +1,7 @@
--- Update the original table with unique values within each row
-UPDATE test
-SET columnB = (
-    SELECT CONCAT_WS(';', ARRAY_JOIN(ARRAY_DISTINCT(SPLIT(columnB, ';')), ';'))
-);
+val joinConditions = orgCols.map(orgCol =>
+      col("b.access_object") === orgCol ||
+        expr(s"CONCAT('CA-', b.access_object)") === orgCol
+    )
 
--- Display the updated table
-SELECT * FROM test;
+    // Dynamically construct the join condition
+    val joinCondition = joinConditions.reduce(_ || _)
