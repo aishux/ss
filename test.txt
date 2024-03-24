@@ -1,0 +1,22 @@
+
+Subject: Completion of Assigned Task and Kyvos Cube Build Failure
+
+Dear [Manager's Name],
+
+I hope this email finds you well. I wanted to update you on the completion of the task you assigned to me before my upcoming vacation.
+
+I'm pleased to inform you that I have successfully completed the task over the weekend as planned. All the necessary details pertaining to the task have been documented in the Git Issue, accessible through the following link: [Insert Git Issue Link Here].
+
+However, I'd like to bring to your attention an issue regarding the Kyvos cube build. Unfortunately, it seems that the cube build is failing due to a different error, as indicated in the screenshot I've attached to this email.
+
+I understand the importance of resolving this issue promptly to ensure smooth operations. I will be available for any assistance or further clarification upon my return from vacation.
+
+Thank you for your understanding and support.
+
+Best regards,
+
+[Your Name]
+[Your Position/Department]
+[Your Contact Information]
+
+[Attached: Screenshot of Kyvos Cube Build Failure]
