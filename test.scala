@@ -78,10 +78,7 @@ resultDF.show()
 
 
 
-
-
-
-###################
+###############################################################################################################
 
 import org.apache.spark.sql.functions._
 
@@ -99,3 +96,36 @@ val resultDF = adjMappingData.join(aggregatedDF, Seq("EXT_TIM_IDENT", "EXT_TVT_I
 resultDF.show()
 
 
+###############################################################################################################
+
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
+
+// Create SparkSession
+val spark = SparkSession.builder()
+  .appName("MergeRows")
+  .getOrCreate()
+
+// Example DataFrame
+val data = Seq(
+  ("abc", "def", "xyz", Some(100), None, None),
+  ("abc", "def", "xyz", None, Some(200), None),
+  ("abc", "def", "xyz", None, None, Some(300))
+)
+
+val df = spark.createDataFrame(data)
+  .toDF("A", "B", "C", "D", "E", "F")
+
+// Define the aggregation function
+val aggFunctions = Map(
+  "D" -> "max",
+  "E" -> "max",
+  "F" -> "max"
+)
+
+// Apply aggregation
+val result = df.groupBy("A", "B", "C").agg(aggFunctions)
+
+// Show the result
+result.show()
