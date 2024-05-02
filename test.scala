@@ -75,3 +75,27 @@ resultDF.show()
 
 // Show the result
 resultDF.show()
+
+
+
+
+
+
+###################
+
+import org.apache.spark.sql.functions._
+
+val aggregatedDF = joinedDF.groupBy("EXT_TIM_IDENT", "EXT_TVT_IDENT", "REPORTING_CURRENCY")
+  .agg(
+    sum(when($"FROM" === "USD", $"AMOUNT" / $"EXCHANGE_RATE")).alias("AMOUNT_USD"),
+    sum(when($"FROM" === "CHF", $"AMOUNT" / $"EXCHANGE_RATE")).alias("AMOUNT_CHF"),
+    sum(when($"FROM" === "EUR", $"AMOUNT" / $"EXCHANGE_RATE")).alias("AMOUNT_EUR"),
+    sum(when($"FROM" === "GBP", $"AMOUNT" / $"EXCHANGE_RATE")).alias("AMOUNT_GBP")
+  )
+
+val resultDF = adjMappingData.join(aggregatedDF, Seq("EXT_TIM_IDENT", "EXT_TVT_IDENT", "REPORTING_CURRENCY"), "left")
+  .select("EXT_TIM_IDENT", "EXT_TVT_IDENT", "REPORTING_CURRENCY", "AMOUNT_USD", "AMOUNT_CHF", "AMOUNT_EUR", "AMOUNT_GBP")
+
+resultDF.show()
+
+
