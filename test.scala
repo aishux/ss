@@ -56,9 +56,10 @@ val joinedDF = adjMappingData.join(
 )
 
 // Apply currency conversion and pivot
+// Apply currency conversion and pivot
 val convertedDF = joinedDF
   .withColumn("CONVERTED_AMOUNT", $"AMOUNT" / $"EXCHANGE_RATE")
-  .groupBy("EXT_TIM_IDENT", "EXT_TVT_IDENT", "REPORTING_CURRENCY", "AMOUNT")
+  .groupBy(joinedDF.columns.map(col): _*) // Group by all columns
   .pivot("FROM", Seq("USD", "EUR", "GBP", "CHF"))
   .agg(first("CONVERTED_AMOUNT"))
 
