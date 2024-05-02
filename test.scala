@@ -41,5 +41,36 @@ val convertedDF = joinedDF.withColumn("AMOUNT_CHF", when($"FROM" === "CHF", $"AM
 val resultDF = convertedDF.select("EXT_TIM_IDENT", "EXT_TVT_IDENT", "REPORTING_CURRENCY", "AMOUNT",
   "AMOUNT_CHF", "AMOUNT_EUR", "AMOUNT_GBP", "AMOUNT_USD")
 
+###############################################################################################################
+
+
+import org.apache.spark.sql.functions._
+
+// Perform join
+val joinedDF = adjMappingData.join(
+  fxRateData,
+  ($"EXT_TIM_IDENT" === $"COB_DATE") &&
+  ($"EXT_TVT_IDENT" === lit("M")) &&
+  ($"REPORTING_CURRENCY" === $"TO") &&
+  ($"FROM".isin("USD", "EUR", "GBP", "CHF"))
+)
+
+// Apply currency conversion and pivot
+val convertedDF = joinedDF
+  .withColumn("CONVERTED_AMOUNT", $"AMOUNT" / $"EXCHANGE_RATE")
+  .groupBy("EXT_TIM_IDENT", "EXT_TVT_IDENT", "REPORTING_CURRENCY", "AMOUNT")
+  .pivot("FROM", Seq("USD", "EUR", "GBP", "CHF"))
+  .agg(first("CONVERTED_AMOUNT"))
+
+// Select relevant columns
+val resultDF = convertedDF.select(
+  $"EXT_TIM_IDENT", $"EXT_TVT_IDENT", $"REPORTING_CURRENCY", $"AMOUNT",
+  $"USD".alias("AMOUNT_USD"), $"EUR".alias("AMOUNT_EUR"),
+  $"GBP".alias("AMOUNT_GBP"), $"CHF".alias("AMOUNT_CHF")
+)
+
+// Show the result
+resultDF.show()
+
 // Show the result
 resultDF.show()
