@@ -27,3 +27,17 @@ val result = df.join(chfRates, df("TO") === lit("CHF"), "left")
 
 // Show the result
 result.show()
+
+
+###########
+
+from pyspark.sql.functions import col, when
+
+# Assuming 'to' column represents the currency
+# Assuming 'ex_rate' column represents the exchange rate
+
+# Define the exchange rate for CHF
+chf_exchange_rate = df.select("ex_rate").filter(col("to") == "chf").collect()[0][0]
+
+# Create a new column 'EXC_RATE_CHF'
+df = df.withColumn("EXC_RATE_CHF", col("ex_rate") / when(col("to") == "chf", chf_exchange_rate).otherwise(1))
