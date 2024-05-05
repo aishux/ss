@@ -25,3 +25,17 @@ val resultDF = df.withColumn("EX_RT_CHF", lit(chfValue))
 
 // Show result
 resultDF.show()
+
+
+#######
+
+import org.apache.spark.sql.functions._
+
+// Group by ID and get the CHF value for each group
+val chfValues = df.groupBy("ID").agg(first(when(col("TO") === "CHF", col("EX_RT"))).alias("EX_RT_CHF"))
+
+// Join the original DataFrame with the calculated CHF values
+val resultDF = df.join(chfValues, Seq("ID"), "left")
+
+// Show result
+resultDF.show()
