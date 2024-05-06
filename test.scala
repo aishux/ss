@@ -39,3 +39,14 @@ val resultDF = df.join(chfValues, Seq("ID"), "left")
 
 // Show result
 resultDF.show()
+
+#######
+
+SELECT t1.A, t1.B, t1.C, t1.D, t1.E, t1.F, t1.G, t2.F AS J
+FROM Temp1 AS t1
+LEFT JOIN (
+    SELECT A, B, C, G, F
+    FROM Temp1
+    WHERE D = 'CHF' AND E = 'USD'
+) AS t2
+ON t1.A = t2.A AND t1.B = t2.B AND t1.C = t2.C AND t1.G = t2.G;
