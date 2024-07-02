@@ -1,21 +1,11 @@
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions._
-
-val spark = SparkSession.builder.appName("DefaultColumn").getOrCreate()
-import spark.implicits._
-
-// Sample DataFrame
-val data = Seq(
-  (1, "oldA"),
-  (2, "oldA")
-).toDF("id", "A")
-
-// Perform transformation on column "A" and add column "B" if it doesn't exist
-val columns = data.columns
-
-val resultDF = data
-  .withColumn("A", lit("A"))
-  .withColumn("B", when(lit(columns.contains("B")), col("B")).otherwise(lit("XYZ")))
-
-// Display the result
-resultDF.show()
+SELECT 
+    it.PARENT_CODE,
+    it.CHILD_CODE,
+    COALESCE(ut.CHILD_DESC, it.CHILD_DESC) AS CHILD_DESC
+FROM 
+    InternalTable it
+LEFT JOIN 
+    UnifiedTable ut
+ON 
+    it.PARENT_CODE = ut.PARENT_CODE
+    AND it.CHILD_CODE = ut.CHILD_CODE;
