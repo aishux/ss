@@ -1,35 +1,9 @@
-Certainly! Here’s the revised email with bullet points listing the specific changes:
+Certainly! Here’s a concise project description:
 
 ---
 
-**Subject: Request for Project Details Modification - Internal Hackathon**
+**Project Title: Internal Mobility Web Portal**
 
-Dear [Organizing Committee's Name/Team],
+**Description:**  
+Our project aims to streamline the internal mobility process within the organization by developing a web portal that connects employees with hiring managers. Instead of employees solely applying for job IDs, the portal allows them to create detailed profiles showcasing their skills, experience, and career interests. Hiring managers can then proactively search for and reach out to suitable candidates based on their requirements, fostering a more dynamic and efficient internal hiring process. This approach empowers employees by increasing visibility of their potential and enables hiring managers to find the right talent faster.
 
-I hope this message finds you well. I am writing on behalf of my team regarding our participation in the upcoming internal hackathon. After further discussion and consideration, we have realized that modifying our project details would better align with our skills and the hackathon's objectives.
-
-Below are the specific changes we would like to request:
-
-- **[Current Aspect 1]**: [Brief explanation of what it is now]  
-  **Proposed Change**: [Brief explanation of what you want to change it to].
-
-- **[Current Aspect 2]**: [Brief explanation of what it is now]  
-  **Proposed Change**: [Brief explanation of what you want to change it to].
-
-- **[Current Aspect 3]**: [Brief explanation of what it is now]  
-  **Proposed Change**: [Brief explanation of what you want to change it to].
-
-We understand that changes at this stage might be challenging, but we believe that this adjustment will allow us to deliver a more impactful and innovative solution. Our revised idea is more refined and directly addresses a critical issue, which we believe will add significant value to the hackathon.
-
-We kindly request your permission to update our project details. We assure you that this change will not affect the timelines, and we are fully committed to adhering to all other guidelines.
-
-Thank you for your understanding and consideration. We look forward to your positive response and are excited to contribute to the success of the hackathon.
-
-Best regards,  
-[Your Name]  
-[Your Team Name]  
-[Your Position/Role]  
-
----
-
-Replace the placeholders with the current aspects and proposed changes relevant to your project.
