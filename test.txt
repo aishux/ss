@@ -1,1 +1,11 @@
+MERGE INTO target_table AS target
+USING source_table AS source
+ON target.matching_column = source.matching_column
+WHEN MATCHED THEN
+    UPDATE SET
+        target.column1 = source.column1,
+        target.column2 = source.column2
+WHEN NOT MATCHED THEN
+    INSERT (column1, column2)
+    VALUES (source.column1, source.column2);
 
