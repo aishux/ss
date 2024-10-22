@@ -1,1 +1,11 @@
-https://trinket.io/python3/52187bdd6c2b
+Hi [Recipient's Name],
+
+Thank you for the update. I understand that many were facing issues with installing Jupyter Notebook. As an alternative, please feel free to use the following link to run Python in an online editor:
+
+[Insert link here]
+
+This should help everyone get started without further delays. Please don’t hesitate to reach out if anyone encounters any issues or needs additional assistance.
+
+Best regards,
+[Your Name]
+[Your Position]
