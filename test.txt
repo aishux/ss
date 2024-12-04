@@ -1,8 +1,19 @@
-SELECT 
-    CASE 
-        WHEN CHARINDEX('-', column_name) > 0 
-        THEN RIGHT(column_name, LEN(column_name) - CHARINDEX('-', column_name))
-        ELSE column_name
-    END AS output_value
-FROM your_table;
+-- Optimized Query
+SELECT DISTINCT
+    O.IDENTIFICATION,
+    SPLIT(O.IDENTIFICATION, '*')[0] AS COST_CENTRE,
+    CASE
+        WHEN SIZE(SPLIT(O.IDENTIFICATION, '-')) = 3 THEN 
+            CONCAT(SPLIT(O.IDENTIFICATION, '-')[1], '-', SPLIT(O.IDENTIFICATION, '-')[2])
+        ELSE SPLIT(O.IDENTIFICATION, '-')[1]
+    END AS CLIENT_ADVISOR,
+    O.NAME AS CLIENT_ADVISOR_NAME,
+    R.PARTNER_ELEMENT_ID AS PARTNER_ID
+FROM governed.gmis_gpc_clientmi_dim_org_governed O
+JOIN governed.gmis_gpc_clietmi_dim_par_org_rel_governed R
+    ON R.ORGANIZATION_ELEMENT_ID = O.ID
+WHERE 
+    O.VALID_TO_EXCL IS NULL 
+    AND R.VALID_TO_EXCL IS NULL 
+    AND R.RELATION_TYPE_ID = '1';
 
