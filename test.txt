@@ -12,7 +12,7 @@ SELECT DISTINCT
                 '-',
                 SUBSTRING(
                     O.IDENTIFICATION,
-                    INSTR(O.IDENTIFICATION, '-', INSTR(O.IDENTIFICATION, '-') + 1) + 1
+                    INSTR(SUBSTRING(O.IDENTIFICATION, INSTR(O.IDENTIFICATION, '-') + 1), '-') + INSTR(O.IDENTIFICATION, '-') + 1
                 )
             )
         ELSE
