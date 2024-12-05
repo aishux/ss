@@ -2,11 +2,9 @@ Hi [Colleague’s Name],
 
 I hope you’re doing well.
 
-I remember assisting you with the ADO pipeline setup a couple of years ago, but unfortunately, I don’t recall the specifics now. Additionally, given my current workload, I’m unable to revisit this topic or provide the support it would require.
+I remember assisting you with the ADO pipeline setup a couple of years ago. While I don’t recall the specific details now and don’t have the bandwidth to revisit this topic, I believe the file you’re looking for might be the one linked here: [Insert Link].
 
-I’d recommend reaching out to the Platform team, as they specialize in this area and will be able to provide you with the best guidance for your requirements.
-
-Let me know if there’s anything else I can assist with.
+For further assistance with setting this up or troubleshooting, I’d recommend reaching out to the Platform team, as they specialize in this area and will be able to provide you with detailed guidance.
 
 Best regards,
 [Your Name]
