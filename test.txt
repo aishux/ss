@@ -1,34 +1,33 @@
-import org.apache.spark.sql.SparkSession
-
-// Initialize Spark Session
-val spark = SparkSession.builder()
-  .appName("Optimized Query")
-  .getOrCreate()
-
-// Load Data
-val orgData = spark.table("governed.gmis_gpc_clientmi_dim_org_governed")
-val relData = spark.table("governed.gmis_gpc_clietmi_dim_par_org_rel_governed")
-
-// Filter Early
-val filteredOrgData = orgData.filter("VALID_TO_EXCL IS NULL")
-val filteredRelData = relData.filter("VALID_TO_EXCL IS NULL AND RELATION_TYPE_ID = '1'")
-
-// Join and Transform
-val result = filteredOrgData
-  .join(filteredRelData, filteredOrgData("ID") === filteredRelData("ORGANIZATION_ELEMENT_ID"))
-  .selectExpr(
-    "DISTINCT O.IDENTIFICATION",
-    "split(O.IDENTIFICATION, '*')[0] AS COST_CENTRE",
-    """
-      CASE 
-        WHEN size(split(O.IDENTIFICATION, '-')) = 3 
-        THEN concat(split(O.IDENTIFICATION, '-')[1], '-', split(O.IDENTIFICATION, '-')[2])
-        ELSE split(O.IDENTIFICATION, '-')[1]
-      END AS CLIENT_ADVISOR
-    """,
-    "O.NAME AS CLIENT_ADVISOR_NAME",
-    "R.PARTNER_ELEMENT_ID AS PARTNER_ID"
-  )
-
-// Write or Show Result
-result.show()
+SELECT DISTINCT
+    O.IDENTIFICATION,
+    SUBSTRING(O.IDENTIFICATION, 1, INSTR(O.IDENTIFICATION, '*') - 1) AS COST_CENTRE,
+    CASE
+        WHEN LENGTH(O.IDENTIFICATION) - LENGTH(REPLACE(O.IDENTIFICATION, '-', '')) = 2 THEN
+            CONCAT(
+                SUBSTRING(
+                    O.IDENTIFICATION, 
+                    INSTR(O.IDENTIFICATION, '-') + 1, 
+                    INSTR(SUBSTRING(O.IDENTIFICATION, INSTR(O.IDENTIFICATION, '-') + 1), '-') - 1
+                ),
+                '-',
+                SUBSTRING(
+                    O.IDENTIFICATION,
+                    INSTR(O.IDENTIFICATION, '-', INSTR(O.IDENTIFICATION, '-') + 1) + 1
+                )
+            )
+        ELSE
+            SUBSTRING(
+                O.IDENTIFICATION, 
+                INSTR(O.IDENTIFICATION, '-') + 1, 
+                INSTR(SUBSTRING(O.IDENTIFICATION, INSTR(O.IDENTIFICATION, '-') + 1), '-') - 1
+            )
+    END AS CLIENT_ADVISOR,
+    O.NAME AS CLIENT_ADVISOR_NAME,
+    R.PARTNER_ELEMENT_ID AS PARTNER_ID
+FROM governed.gmis_gpc_clientmi_dim_org_governed O
+JOIN governed.gmis_gpc_clietmi_dim_par_org_rel_governed R
+    ON R.ORGANIZATION_ELEMENT_ID = O.ID
+WHERE 
+    O.VALID_TO_EXCL IS NULL 
+    AND R.VALID_TO_EXCL IS NULL 
+    AND R.RELATION_TYPE_ID = '1';
