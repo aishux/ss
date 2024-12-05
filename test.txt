@@ -1,26 +1,15 @@
 SELECT DISTINCT
     O.IDENTIFICATION,
-    SUBSTRING(O.IDENTIFICATION, 1, INSTR(O.IDENTIFICATION, '*') - 1) AS COST_CENTRE,
+    REGEXP_SUBSTR(O.IDENTIFICATION, '^[^*]+') AS COST_CENTRE, -- Extracts everything before the first '-'
     CASE
         WHEN LENGTH(O.IDENTIFICATION) - LENGTH(REPLACE(O.IDENTIFICATION, '-', '')) = 2 THEN
             CONCAT(
-                SUBSTRING(
-                    O.IDENTIFICATION, 
-                    INSTR(O.IDENTIFICATION, '-') + 1, 
-                    INSTR(SUBSTRING(O.IDENTIFICATION, INSTR(O.IDENTIFICATION, '-') + 1), '-') - 1
-                ),
+                REGEXP_SUBSTR(O.IDENTIFICATION, '(?<=-)[^-]+'), -- Extracts first segment after '-'
                 '-',
-                SUBSTRING(
-                    O.IDENTIFICATION,
-                    INSTR(SUBSTRING(O.IDENTIFICATION, INSTR(O.IDENTIFICATION, '-') + 1), '-') + INSTR(O.IDENTIFICATION, '-') + 1
-                )
+                REGEXP_SUBSTR(O.IDENTIFICATION, '(?<=-)[^-]+', 2) -- Extracts second segment after '-'
             )
         ELSE
-            SUBSTRING(
-                O.IDENTIFICATION, 
-                INSTR(O.IDENTIFICATION, '-') + 1, 
-                INSTR(SUBSTRING(O.IDENTIFICATION, INSTR(O.IDENTIFICATION, '-') + 1), '-') - 1
-            )
+            REGEXP_SUBSTR(O.IDENTIFICATION, '(?<=-)[^-]+') -- Extracts the first segment after '-'
     END AS CLIENT_ADVISOR,
     O.NAME AS CLIENT_ADVISOR_NAME,
     R.PARTNER_ELEMENT_ID AS PARTNER_ID
