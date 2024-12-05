@@ -1,22 +1,12 @@
-SELECT DISTINCT
-    O.IDENTIFICATION,
-    REGEXP_SUBSTR(O.IDENTIFICATION, '^[^*]+') AS COST_CENTRE, -- Extracts everything before the first '-'
-    CASE
-        WHEN LENGTH(O.IDENTIFICATION) - LENGTH(REPLACE(O.IDENTIFICATION, '-', '')) = 2 THEN
-            CONCAT(
-                REGEXP_SUBSTR(O.IDENTIFICATION, '(?<=-)[^-]+'), -- Extracts first segment after '-'
-                '-',
-                REGEXP_SUBSTR(O.IDENTIFICATION, '(?<=-)[^-]+', 2) -- Extracts second segment after '-'
-            )
-        ELSE
-            REGEXP_SUBSTR(O.IDENTIFICATION, '(?<=-)[^-]+') -- Extracts the first segment after '-'
-    END AS CLIENT_ADVISOR,
-    O.NAME AS CLIENT_ADVISOR_NAME,
-    R.PARTNER_ELEMENT_ID AS PARTNER_ID
-FROM governed.gmis_gpc_clientmi_dim_org_governed O
-JOIN governed.gmis_gpc_clietmi_dim_par_org_rel_governed R
-    ON R.ORGANIZATION_ELEMENT_ID = O.ID
-WHERE 
-    O.VALID_TO_EXCL IS NULL 
-    AND R.VALID_TO_EXCL IS NULL 
-    AND R.RELATION_TYPE_ID = '1';
+Hi [Colleague’s Name],
+
+I hope you’re doing well.
+
+I remember assisting you with the ADO pipeline setup a couple of years ago, but unfortunately, I don’t recall the specifics now. Additionally, given my current workload, I’m unable to revisit this topic or provide the support it would require.
+
+I’d recommend reaching out to the Platform team, as they specialize in this area and will be able to provide you with the best guidance for your requirements.
+
+Let me know if there’s anything else I can assist with.
+
+Best regards,
+[Your Name]
