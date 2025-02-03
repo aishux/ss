@@ -1,8 +1,7 @@
-Dear Team,
+Hi [Sender's Name],
 
-I’d like to walk you through the Client MI processes and file deliveries to ensure clarity and alignment. Please let me know a suitable time, or I can propose one.
+I noticed that two new attributes, _ and _, have been added as part of the Client MI. I’d like to understand their purpose, how they will be used, and their significance in the overall data flow.
 
-If I’ve missed anyone, kindly forward this invite.
+Could you please provide some context around these attributes? Additionally, if there are any specific handling or transformation requirements on our end, do let me know.
 
-Best regards,
-[Your Name]
+Looking forward to your insights.
