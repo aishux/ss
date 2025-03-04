@@ -1,7 +1,11 @@
-Hi [Sender's Name],
+For my user, I made a custom directory named codebase/pip_cache/ in my home directory.
 
-I noticed that two new attributes, _ and _, have been added as part of the Client MI. I’d like to understand their purpose, how they will be used, and their significance in the overall data flow.
+First I tried --no-cache-dir using the following command -
 
-Could you please provide some context around these attributes? Additionally, if there are any specific handling or transformation requirements on our end, do let me know.
+TMPDIR=/home/deepakahire/codebase/pip_cache/ pip install -e . --no-cache-dir. This didn't work.
 
-Looking forward to your insights.
+Finally, I specified the --cache-dir as well, and used the following command to install the package -
+
+TMPDIR=/home/deepakahire/codebase/pip_cache/ pip install --cache-dir=/home/deepakahire/codebase/pip_cache/ -e . This worked for me.
+
+Caveat- Blindly deleting everything from /tmp directory would delete your tmux sessions, but will still keep the services/instances alive on the same ports, which were switched on in any tmux session previously.
