@@ -1,11 +1,31 @@
-For my user, I made a custom directory named codebase/pip_cache/ in my home directory.
+WITH ExplodedEmails AS (
+    SELECT 
+        LEVEL4_CODE, 
+        LEVEL5_CODE, 
+        VU1_EMAILS, 
+        VW3_EMAILS, 
+        email
+    FROM your_table 
+    LATERAL VIEW EXPLODE(SPLIT(VU1_EMAILS, ', ')) vu1 AS email
+    WHERE LEVEL4_CODE = 'P9WP'
+    
+    UNION 
 
-First I tried --no-cache-dir using the following command -
-
-TMPDIR=/home/deepakahire/codebase/pip_cache/ pip install -e . --no-cache-dir. This didn't work.
-
-Finally, I specified the --cache-dir as well, and used the following command to install the package -
-
-TMPDIR=/home/deepakahire/codebase/pip_cache/ pip install --cache-dir=/home/deepakahire/codebase/pip_cache/ -e . This worked for me.
-
-Caveat- Blindly deleting everything from /tmp directory would delete your tmux sessions, but will still keep the services/instances alive on the same ports, which were switched on in any tmux session previously.
+    SELECT 
+        LEVEL4_CODE, 
+        LEVEL5_CODE, 
+        VU1_EMAILS, 
+        VW3_EMAILS, 
+        email
+    FROM your_table 
+    LATERAL VIEW EXPLODE(SPLIT(VW3_EMAILS, ', ')) vw3 AS email
+    WHERE LEVEL4_CODE = 'P9WP'
+)
+SELECT 
+    LEVEL4_CODE, 
+    LEVEL5_CODE, 
+    VU1_EMAILS, 
+    VW3_EMAILS, 
+    ARRAY_JOIN(COLLECT_SET(email), ', ') AS MERGED_VW3_EMAILS
+FROM ExplodedEmails
+GROUP BY LEVEL4_CODE, LEVEL5_CODE, VU1_EMAILS, VW3_EMAILS;
