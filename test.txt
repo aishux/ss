@@ -29,3 +29,33 @@ SELECT
     ARRAY_JOIN(COLLECT_SET(email), ', ') AS MERGED_VW3_EMAILS
 FROM ExplodedEmails
 GROUP BY LEVEL4_CODE, LEVEL5_CODE, VU1_EMAILS, VW3_EMAILS;
+
+
+SELECT 
+    LEVEL4_CODE, 
+    LEVEL5_CODE, 
+    VU1_EMAILS, 
+    ARRAY_JOIN(COLLECT_SET(email), ', ') AS VW3_EMAILS
+FROM (
+    SELECT 
+        LEVEL4_CODE, 
+        LEVEL5_CODE, 
+        VU1_EMAILS, 
+        email
+    FROM your_table 
+    LATERAL VIEW EXPLODE(SPLIT(VU1_EMAILS, ', ')) vu1 AS email
+    WHERE LEVEL4_CODE = 'P9WP'
+    
+    UNION 
+
+    SELECT 
+        LEVEL4_CODE, 
+        LEVEL5_CODE, 
+        VU1_EMAILS, 
+        email
+    FROM your_table 
+    LATERAL VIEW EXPLODE(SPLIT(VW3_EMAILS, ', ')) vw3 AS email
+    WHERE LEVEL4_CODE = 'P9WP'
+) AS MergedEmails
+GROUP BY LEVEL4_CODE, LEVEL5_CODE, VU1_EMAILS;
+
