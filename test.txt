@@ -25,7 +25,7 @@ val mergedEmails = explodedVU1.union(explodedVW3)
 // Group by all original columns except VW3_EMAILS and aggregate email values
 val finalDf = mergedEmails
   .groupBy(allColumns.map(col): _*)  // Group by all columns except VW3_EMAILS
-  .agg(array_join(collect_set(col("email")), ", ").alias("VW3_EMAILS"))
+  .agg(array_join(array_distinct(collect_list(col("email"))), ", ").alias("VW3_EMAILS"))
 
 // Show the result
 finalDf.show(false)
