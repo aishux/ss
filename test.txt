@@ -1,32 +1,28 @@
-WITH MergedEmails AS (
-    SELECT 
-        LEVEL4_CODE, 
-        LEVEL5_CODE, 
-        VU1_EMAILS, 
-        VW3_EMAILS, 
-        email
-    FROM your_table 
-    LATERAL VIEW EXPLODE(SPLIT(VU1_EMAILS, ', ')) vu1 AS email
-    WHERE LEVEL4_CODE = 'P9WP'
+import org.apache.spark.sql.functions._
+import spark.implicits._
 
-    UNION 
+// Load your table (Replace with actual table loading method)
+val df = spark.table("your_table")
 
-    SELECT 
-        LEVEL4_CODE, 
-        LEVEL5_CODE, 
-        VU1_EMAILS, 
-        VW3_EMAILS, 
-        email
-    FROM your_table 
-    LATERAL VIEW EXPLODE(SPLIT(VW3_EMAILS, ', ')) vw3 AS email
-    WHERE LEVEL4_CODE = 'P9WP'
-)
+// Filter for LEVEL4_CODE = 'P9WP'
+val filteredDf = df.filter($"LEVEL4_CODE" === "P9WP")
 
-SELECT 
-    t.*, 
-    ARRAY_JOIN(COLLECT_SET(m.email), ', ') AS VW3_EMAILS
-FROM your_table t
-LEFT JOIN MergedEmails m
-ON t.LEVEL4_CODE = m.LEVEL4_CODE AND t.LEVEL5_CODE = m.LEVEL5_CODE
-WHERE t.LEVEL4_CODE = 'P9WP'
-GROUP BY t.*;
+// Explode VU1_EMAILS and VW3_EMAILS into individual email rows
+val explodedVU1 = filteredDf
+  .withColumn("email", explode(split(col("VU1_EMAILS"), ", ")))
+  .select($"LEVEL4_CODE", $"LEVEL5_CODE", $"VU1_EMAILS", $"email")
+
+val explodedVW3 = filteredDf
+  .withColumn("email", explode(split(col("VW3_EMAILS"), ", ")))
+  .select($"LEVEL4_CODE", $"LEVEL5_CODE", $"VU1_EMAILS", $"email")
+
+// Merge both exploded email lists
+val mergedEmails = explodedVU1.union(explodedVW3)
+
+// Aggregate to get distinct emails back into VW3_EMAILS
+val finalDf = mergedEmails
+  .groupBy("LEVEL4_CODE", "LEVEL5_CODE", "VU1_EMAILS")
+  .agg(array_join(collect_set(col("email")), ", ").alias("VW3_EMAILS"))
+
+// Show the result
+finalDf.show(false)
