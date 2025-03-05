@@ -7,21 +7,24 @@ val df = spark.table("your_table")
 // Filter for LEVEL4_CODE = 'P9WP'
 val filteredDf = df.filter($"LEVEL4_CODE" === "P9WP")
 
+// Get all column names except VW3_EMAILS
+val allColumns = df.columns.filter(_ != "VW3_EMAILS")
+
 // Explode VU1_EMAILS and VW3_EMAILS into individual email rows
 val explodedVU1 = filteredDf
   .withColumn("email", explode(split(col("VU1_EMAILS"), ", ")))
-  .select($"LEVEL4_CODE", $"LEVEL5_CODE", $"VU1_EMAILS", $"email")
+  .selectExpr(allColumns :+ "email": _*)
 
 val explodedVW3 = filteredDf
   .withColumn("email", explode(split(col("VW3_EMAILS"), ", ")))
-  .select($"LEVEL4_CODE", $"LEVEL5_CODE", $"VU1_EMAILS", $"email")
+  .selectExpr(allColumns :+ "email": _*)
 
 // Merge both exploded email lists
 val mergedEmails = explodedVU1.union(explodedVW3)
 
-// Aggregate to get distinct emails back into VW3_EMAILS
+// Group by all original columns except VW3_EMAILS and aggregate email values
 val finalDf = mergedEmails
-  .groupBy("LEVEL4_CODE", "LEVEL5_CODE", "VU1_EMAILS")
+  .groupBy(allColumns.map(col): _*)  // Group by all columns except VW3_EMAILS
   .agg(array_join(collect_set(col("email")), ", ").alias("VW3_EMAILS"))
 
 // Show the result
