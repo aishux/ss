@@ -1,4 +1,4 @@
-WITH ExplodedEmails AS (
+WITH MergedEmails AS (
     SELECT 
         LEVEL4_CODE, 
         LEVEL5_CODE, 
@@ -8,7 +8,7 @@ WITH ExplodedEmails AS (
     FROM your_table 
     LATERAL VIEW EXPLODE(SPLIT(VU1_EMAILS, ', ')) vu1 AS email
     WHERE LEVEL4_CODE = 'P9WP'
-    
+
     UNION 
 
     SELECT 
@@ -21,41 +21,12 @@ WITH ExplodedEmails AS (
     LATERAL VIEW EXPLODE(SPLIT(VW3_EMAILS, ', ')) vw3 AS email
     WHERE LEVEL4_CODE = 'P9WP'
 )
-SELECT 
-    LEVEL4_CODE, 
-    LEVEL5_CODE, 
-    VU1_EMAILS, 
-    VW3_EMAILS, 
-    ARRAY_JOIN(COLLECT_SET(email), ', ') AS MERGED_VW3_EMAILS
-FROM ExplodedEmails
-GROUP BY LEVEL4_CODE, LEVEL5_CODE, VU1_EMAILS, VW3_EMAILS;
-
 
 SELECT 
-    LEVEL4_CODE, 
-    LEVEL5_CODE, 
-    VU1_EMAILS, 
-    ARRAY_JOIN(COLLECT_SET(email), ', ') AS VW3_EMAILS
-FROM (
-    SELECT 
-        LEVEL4_CODE, 
-        LEVEL5_CODE, 
-        VU1_EMAILS, 
-        email
-    FROM your_table 
-    LATERAL VIEW EXPLODE(SPLIT(VU1_EMAILS, ', ')) vu1 AS email
-    WHERE LEVEL4_CODE = 'P9WP'
-    
-    UNION 
-
-    SELECT 
-        LEVEL4_CODE, 
-        LEVEL5_CODE, 
-        VU1_EMAILS, 
-        email
-    FROM your_table 
-    LATERAL VIEW EXPLODE(SPLIT(VW3_EMAILS, ', ')) vw3 AS email
-    WHERE LEVEL4_CODE = 'P9WP'
-) AS MergedEmails
-GROUP BY LEVEL4_CODE, LEVEL5_CODE, VU1_EMAILS;
-
+    t.*, 
+    ARRAY_JOIN(COLLECT_SET(m.email), ', ') AS VW3_EMAILS
+FROM your_table t
+LEFT JOIN MergedEmails m
+ON t.LEVEL4_CODE = m.LEVEL4_CODE AND t.LEVEL5_CODE = m.LEVEL5_CODE
+WHERE t.LEVEL4_CODE = 'P9WP'
+GROUP BY t.*;
