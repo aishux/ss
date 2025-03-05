@@ -10,22 +10,23 @@ val filteredDf = df.filter($"LEVEL4_CODE" === "P9WP")
 // Get all column names except VW3_EMAILS
 val allColumns = df.columns.filter(_ != "VW3_EMAILS")
 
-// Explode VU1_EMAILS and VW3_EMAILS into individual email rows
-val explodedVU1 = filteredDf
-  .withColumn("email", explode(split(col("VU1_EMAILS"), ", ")))
-  .selectExpr(allColumns :+ "email": _*)
+// Function to clean and explode email lists
+def explodeEmails(df: org.apache.spark.sql.DataFrame, columnName: String) = {
+  df.withColumn("email", explode(array_distinct(split(trim(col(columnName)), ",\\s*"))))
+    .selectExpr(allColumns :+ "email": _*)
+}
 
-val explodedVW3 = filteredDf
-  .withColumn("email", explode(split(col("VW3_EMAILS"), ", ")))
-  .selectExpr(allColumns :+ "email": _*)
+// Explode VU1_EMAILS and VW3_EMAILS while ensuring unique emails
+val explodedVU1 = explodeEmails(filteredDf, "VU1_EMAILS")
+val explodedVW3 = explodeEmails(filteredDf, "VW3_EMAILS")
 
-// Merge both exploded email lists
-val mergedEmails = explodedVU1.union(explodedVW3)
+// Merge both exploded email lists and ensure uniqueness at row level
+val mergedEmails = explodedVU1.union(explodedVW3).distinct()
 
-// Group by all original columns except VW3_EMAILS and aggregate email values
+// Group by all columns except VW3_EMAILS and aggregate unique email values
 val finalDf = mergedEmails
   .groupBy(allColumns.map(col): _*)  // Group by all columns except VW3_EMAILS
-  .agg(array_join(array_distinct(collect_list(col("email"))), ", ").alias("VW3_EMAILS"))
+  .agg(array_join(collect_set(col("email")), ", ").alias("VW3_EMAILS"))
 
 // Show the result
 finalDf.show(false)
