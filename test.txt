@@ -1,32 +1,19 @@
-import org.apache.spark.sql.functions._
-import spark.implicits._
+Subject: Request for Table Column Details
 
-// Load your table (Replace with actual table loading method)
-val df = spark.table("your_table")
+Hi [User's Name],
 
-// Filter for LEVEL4_CODE = 'P9WP'
-val filteredDf = df.filter($"LEVEL4_CODE" === "P9WP")
+I hope you're doing well.
 
-// Get all column names except VW3_EMAILS
-val allColumns = df.columns.filter(_ != "VW3_EMAILS")
+To ensure seamless integration and accurate usage of the [Table Name] table, could you please provide the following details for each column?
 
-// Function to clean and explode email lists
-def explodeEmails(df: org.apache.spark.sql.DataFrame, columnName: String) = {
-  df.withColumn("email", explode(array_distinct(split(trim(col(columnName)), ",\\s*"))))
-    .selectExpr(allColumns :+ "email": _*)
-}
+Column Purpose – Brief description of what the column represents.
+Data Type & Format – If not obvious (e.g., currency, JSON).
+Unit of Measurement – If applicable (e.g., kg, USD).
+Source/Derivation – If computed or coming from another table.
+Key Constraints – Primary/foreign key, uniqueness, etc.
+Special Values/NULL Handling – Meaning of NULLs or default values.
+Example Values – Common or expected values.
+This will help ensure clarity and correctness in our implementation. Let me know if you need any clarification. Looking forward to your response.
 
-// Explode VU1_EMAILS and VW3_EMAILS while ensuring unique emails
-val explodedVU1 = explodeEmails(filteredDf, "VU1_EMAILS")
-val explodedVW3 = explodeEmails(filteredDf, "VW3_EMAILS")
-
-// Merge both exploded email lists and ensure uniqueness at row level
-val mergedEmails = explodedVU1.union(explodedVW3).distinct()
-
-// Group by all columns except VW3_EMAILS and aggregate unique email values
-val finalDf = mergedEmails
-  .groupBy(allColumns.map(col): _*)  // Group by all columns except VW3_EMAILS
-  .agg(array_join(collect_set(col("email")), ", ").alias("VW3_EMAILS"))
-
-// Show the result
-finalDf.show(false)
+Thanks,
+[Your Name]
