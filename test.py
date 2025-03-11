@@ -21,12 +21,12 @@ AZURE_DEPLOYMENT_NAME = "your-deployment-name"
 
 llm = AzureOpenAI(api_key=AZURE_OPENAI_KEY, endpoint=AZURE_OPENAI_ENDPOINT, deployment_name=AZURE_DEPLOYMENT_NAME)
 
-
 def clean_html(comment):
-    """Removes HTML tags and special characters from comments, ensuring proper spacing."""
+    """Removes HTML tags, special characters, and ensures proper formatting."""
     text = BeautifulSoup(str(comment), "html.parser").get_text()
-    text = re.sub(r"[^a-zA-Z0-9\s]", "", text)  # Remove special characters
+    text = re.sub(r"[^a-zA-Z0-9\s+-]", "", text)  # Remove special characters except + and -
     text = re.sub(r"\s+", " ", text).strip()  # Normalize spaces
+    text = re.sub(r"(\b\w+\b) \1", r"\1", text)  # Remove duplicate words
     return text
 
 
