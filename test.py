@@ -48,6 +48,11 @@ def main():
     print("\nCleaned Data:")
     print(df.head())
 
+    # Save to CSV
+    df.to_csv("cleaned_commentary.csv", index=False)
+    print("\nData saved to cleaned_commentary.csv")
+
+
 
 if __name__ == "__main__":
     main()
