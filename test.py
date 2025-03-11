@@ -1,24 +1,81 @@
-import re
+import os
+import pandas as pd
+import sqlalchemy
+from sqlalchemy.engine import create_engine
+from openai import AzureOpenAI
+from bs4 import BeautifulSoup
 
-# Function to extract numbers and calculate their sum
-def extract_and_sum(words):
-    total_sum = 0
-    for word in words:
-        extracted_numbers = re.findall(r'\d+', word)  # Extract numbers using regex
-        if len(extracted_numbers) == 1:
-            num = int(extracted_numbers[0])
-            total_sum += num * 2  # Consider one number twice
-        elif len(extracted_numbers) >= 2:
-            num1 = int(extracted_numbers[0])
-            num2 = int(extracted_numbers[1])
-            total_sum += num1 + num2
+# Database Connection Setup
+DATABRICKS_SERVER = "your-databricks-server"
+DATABRICKS_HTTP_PATH = "your-databricks-http-path"
+DATABRICKS_TOKEN = "your-databricks-token"
 
-    return total_sum
+engine = create_engine(
+    f"databricks://token:{DATABRICKS_TOKEN}@{DATABRICKS_SERVER}:443/{DATABRICKS_HTTP_PATH}"
+)
 
-# Read words from a file where each word is on a separate line
-file_path = 'path_to_your_file.txt'  # Replace with the actual file path
-with open(file_path, 'r') as file:
-    words = file.read().splitlines()
+# Azure OpenAI Configuration
+AZURE_OPENAI_KEY = "your-api-key"
+AZURE_OPENAI_ENDPOINT = "your-openai-endpoint"
+AZURE_DEPLOYMENT_NAME = "your-deployment-name"
 
-result = extract_and_sum(words)
-print("The sum of the extracted numbers:", result)
+llm = AzureOpenAI(api_key=AZURE_OPENAI_KEY, endpoint=AZURE_OPENAI_ENDPOINT, deployment_name=AZURE_DEPLOYMENT_NAME)
+
+
+def fetch_data(filters: dict = None):
+    """Fetches commentary data based on filters."""
+    base_query = """
+    SELECT ACCOUNT_ID, ACCOUNT_DESC, FUNCTION_ID, FUNCTION_DESC, REPORT_ID, PERIOD, 
+           REPORTING_DATE, REPORTING_VIEW, COMMENT
+    FROM PROVISION.CC_COMMENTARY_CUBE2_VW
+    """
+    
+    # Apply filters if provided
+    if filters:
+        filter_conditions = " AND ".join([f"{k} = '{v}'" for k, v in filters.items()])
+        base_query += f" WHERE {filter_conditions}"
+    
+    df = pd.read_sql(base_query, engine)
+    return df
+
+
+def clean_html(comment):
+    """Removes HTML tags from comments."""
+    return BeautifulSoup(comment, "html.parser").get_text()
+
+
+def summarize_comments(df):
+    """Summarizes comments using Azure OpenAI."""
+    grouped = df.groupby([
+        "ACCOUNT_ID", "ACCOUNT_DESC", "FUNCTION_ID", "FUNCTION_DESC", "REPORT_ID", "PERIOD", "REPORTING_DATE", "REPORTING_VIEW" 
+    ])
+    
+    summarized_comments = []
+    for group, data in grouped:
+        cleaned_comments = " ".join([clean_html(comment) for comment in data["COMMENT"]])
+        prompt = f"Summarize the following comments: {cleaned_comments}"
+        summary = llm.complete(prompt)
+        summarized_comments.append(list(group) + [summary])
+    
+    return pd.DataFrame(summarized_comments, columns=[
+        "ACCOUNT_ID", "ACCOUNT_DESC", "FUNCTION_ID", "FUNCTION_DESC", "REPORT_ID", "PERIOD", "REPORTING_DATE", "REPORTING_VIEW", "SUMMARIZED_COMMENT"
+    ])
+
+
+def main():
+    """Main function to execute summarization."""
+    filters = {  # Example filters, modify as needed
+        "ACCOUNT_ID": "U52100",
+        "FUNCTION_ID": "N0000",
+        "REPORT_ID": "GF_Estimate",
+        "PERIOD": "all",
+        "REPORTING_VIEW": "Integration"
+    }
+    df = fetch_data(filters)
+    summarized_df = summarize_comments(df)
+    print(summarized_df)
+    print("Summarization complete.")
+
+
+if __name__ == "__main__":
+    main()
