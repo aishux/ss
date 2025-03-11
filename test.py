@@ -23,8 +23,11 @@ llm = AzureOpenAI(api_key=AZURE_OPENAI_KEY, endpoint=AZURE_OPENAI_ENDPOINT, depl
 
 
 def clean_html(comment):
-    """Removes HTML tags from comments."""
-    return BeautifulSoup(str(comment), "html.parser").get_text()
+    """Removes HTML tags and special characters from comments, ensuring proper spacing."""
+    text = BeautifulSoup(str(comment), "html.parser").get_text()
+    text = re.sub(r"[^a-zA-Z0-9\s]", "", text)  # Remove special characters
+    text = re.sub(r"\s+", " ", text).strip()  # Normalize spaces
+    return text
 
 
 def fetch_and_clean_data():
