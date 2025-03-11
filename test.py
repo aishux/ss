@@ -22,59 +22,31 @@ AZURE_DEPLOYMENT_NAME = "your-deployment-name"
 llm = AzureOpenAI(api_key=AZURE_OPENAI_KEY, endpoint=AZURE_OPENAI_ENDPOINT, deployment_name=AZURE_DEPLOYMENT_NAME)
 
 
-def fetch_data(filters: dict = None):
-    """Fetches commentary data based on filters."""
-    base_query = """
+def clean_html(comment):
+    """Removes HTML tags from comments."""
+    return BeautifulSoup(str(comment), "html.parser").get_text()
+
+
+def fetch_and_clean_data():
+    """Fetches entire commentary table and cleans HTML comments."""
+    query = """
     SELECT ACCOUNT_ID, ACCOUNT_DESC, FUNCTION_ID, FUNCTION_DESC, REPORT_ID, PERIOD, 
            REPORTING_DATE, REPORTING_VIEW, COMMENT
     FROM PROVISION.CC_COMMENTARY_CUBE2_VW
     """
     
-    # Apply filters if provided
-    if filters:
-        filter_conditions = " AND ".join([f"{k} = '{v}'" for k, v in filters.items()])
-        base_query += f" WHERE {filter_conditions}"
-    
-    df = pd.read_sql(base_query, engine)
-    return df
-
-
-def clean_html(comment):
-    """Removes HTML tags from comments."""
-    return BeautifulSoup(comment, "html.parser").get_text()
-
-
-def summarize_comments(df):
-    """Summarizes comments using Azure OpenAI."""
-    grouped = df.groupby([
-        "ACCOUNT_ID", "ACCOUNT_DESC", "FUNCTION_ID", "FUNCTION_DESC", "REPORT_ID", "PERIOD", "REPORTING_DATE", "REPORTING_VIEW" 
-    ])
-    
-    summarized_comments = []
-    for group, data in grouped:
-        cleaned_comments = " ".join([clean_html(comment) for comment in data["COMMENT"]])
-        prompt = f"Summarize the following comments: {cleaned_comments}"
-        summary = llm.complete(prompt)
-        summarized_comments.append(list(group) + [summary])
-    
-    return pd.DataFrame(summarized_comments, columns=[
-        "ACCOUNT_ID", "ACCOUNT_DESC", "FUNCTION_ID", "FUNCTION_DESC", "REPORT_ID", "PERIOD", "REPORTING_DATE", "REPORTING_VIEW", "SUMMARIZED_COMMENT"
-    ])
+    df = pd.read_sql(query, engine)
+    df["COMMENT"] = df["COMMENT"].apply(clean_html)
+    return df, query
 
 
 def main():
-    """Main function to execute summarization."""
-    filters = {  # Example filters, modify as needed
-        "ACCOUNT_ID": "U52100",
-        "FUNCTION_ID": "N0000",
-        "REPORT_ID": "GF_Estimate",
-        "PERIOD": "all",
-        "REPORTING_VIEW": "Integration"
-    }
-    df = fetch_data(filters)
-    summarized_df = summarize_comments(df)
-    print(summarized_df)
-    print("Summarization complete.")
+    """Main function to fetch and clean data."""
+    df, query = fetch_and_clean_data()
+    print("Generated SQL Query:")
+    print(query)
+    print("\nCleaned Data:")
+    print(df.head())
 
 
 if __name__ == "__main__":
