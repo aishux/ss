@@ -4,8 +4,8 @@ import sqlalchemy
 import re
 import json
 from sqlalchemy.engine import create_engine
-from openai import AzureOpenAI
 from bs4 import BeautifulSoup
+from langchain_openai import AzureChatOpenAI
 
 # Database Connection Setup
 DATABRICKS_SERVER = "your-databricks-server"
@@ -21,7 +21,11 @@ AZURE_OPENAI_KEY = "your-api-key"
 AZURE_OPENAI_ENDPOINT = "your-openai-endpoint"
 AZURE_DEPLOYMENT_NAME = "your-deployment-name"
 
-llm = AzureOpenAI(api_key=AZURE_OPENAI_KEY, endpoint=AZURE_OPENAI_ENDPOINT, deployment_name=AZURE_DEPLOYMENT_NAME)
+llm = AzureChatOpenAI(
+    azure_endpoint=AZURE_OPENAI_ENDPOINT,
+    openai_api_key=AZURE_OPENAI_KEY,
+    deployment_name=AZURE_DEPLOYMENT_NAME
+)
 
 
 def clean_html(comment):
@@ -55,12 +59,8 @@ def fetch_and_clean_data(filters=None):
 def summarize_comments(df):
     """Summarizes comments for the retrieved dataset."""
     summary_prompt = "Summarize the following comments:\n" + "\n".join(df["COMMENT"].tolist())
-    response = llm.chat_completions.create(
-        model=AZURE_DEPLOYMENT_NAME,
-        messages=[{"role": "user", "content": summary_prompt}],
-        temperature=0.5
-    )
-    return response.choices[0].message.content.strip()
+    response = llm.invoke(summary_prompt)
+    return response.strip()
 
 
 def main(filters=None):
