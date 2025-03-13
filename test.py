@@ -71,7 +71,9 @@ def summarize_comments(df):
     """Summarizes comments for the retrieved dataset."""
     summary_prompt = "Summarize the following comments:\n" + "\n".join(df["COMMENT"].tolist())
     response = llm.invoke(summary_prompt)
-    return response.strip()
+    if isinstance(response, dict) and "content" in response:
+        return response["content"]
+    return response
 
 
 def main(filters=None):
