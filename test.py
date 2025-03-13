@@ -6,6 +6,17 @@ import json
 from sqlalchemy.engine import create_engine
 from bs4 import BeautifulSoup
 from langchain_openai import AzureChatOpenAI
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+
+# Azure Key Vault Configuration
+KEY_VAULT_NAME = "your-key-vault-name"
+SECRET_NAME = "AZURE-OPENAI-KEY"
+
+credential = DefaultAzureCredential()
+key_vault_url = f"https://{KEY_VAULT_NAME}.vault.azure.net"
+client = SecretClient(vault_url=key_vault_url, credential=credential)
+AZURE_OPENAI_KEY = client.get_secret(SECRET_NAME).value
 
 # Database Connection Setup
 DATABRICKS_SERVER = "your-databricks-server"
