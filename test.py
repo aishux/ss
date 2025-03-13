@@ -69,7 +69,7 @@ def fetch_and_clean_data(filters=None):
 
 def summarize_comments(df):
     """Summarizes comments for the retrieved dataset."""
-    summary_prompt = "Summarize the following comments:\n" + "\n".join(df["COMMENT"].tolist())
+    summary_prompt = "Analyze the following financial commentary and generate a concise summary that captures the key insights, main drivers, and significant impacts mentioned. Ensure clarity and remove redundancy while preserving essential details.\n" + "\n".join(df["COMMENT"].tolist())
     response = llm.invoke(summary_prompt)
     return response.content.strip() if hasattr(response, "content") else str(response).strip()
 
