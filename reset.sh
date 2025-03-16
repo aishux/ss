@@ -1,21 +1,24 @@
-#!/bin/bash
+feedName=$1
 
-# JSON data as a string within the script
-json_data='
-{
-  "name": "John Doe",
-  "age": 30,
-  "email": "john@example.com",
-  "address": {
-    "street": "123 Main St",
-    "city": "Anytown",
-    "country": "USA"
-  }
-}
-'
+if [[ $feedName == *.ctl ]]; then
+    feedNameRegex=$feedName
+else
+    case "$feedName" in
+        "GPCCLI-D-GEN") 
+            feedNameRegex="GPCCLI-D-GEN-[0-9]{8}(-[0-9]+)?\.csv\.gz"
+            ;;
+        "GPCCLI-D-GEN-DIM") 
+            feedNameRegex="GPCCLI-D-GEN-DIM-[0-9]{8}(-[0-9]+)?\.csv\.gz"
+            ;;
+        "GPCCLI-D-GEN_AUDIT") 
+            feedNameRegex="GPCCLI-D-GEN_AUDIT-[0-9]{8}(-[0-9]+)?\.csv\.gz"
+            ;;
+        *)
+            feedNameRegex="$feedName-[0-9]{8}(-[0-9]+)?\.csv\.gz"  # Generic match for other files
+            ;;
+    esac
+fi
 
-# Store the entire JSON data in a variable
-all_data="$json_data"
+expectedFeeds=$2
 
-# Print the entire JSON data stored in the variable
-echo "All Data: $all_data"
+all=$(echo "$allFilesFilt" | grep -E "$feedNameRegex")
