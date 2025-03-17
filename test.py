@@ -68,7 +68,7 @@ def fetch_and_clean_data(filters=None):
 
 
 def summarize_comments(df):
-    """Summarizes comments based on LEAF_FUNC_DESC."""
+    """Summarizes comments based on LEAF_FUNC_DESC in a single paragraph format."""
     grouped_comments = df.groupby("LEAF_FUNC_DESC")["COMMENT"].apply(lambda x: " ".join(x)).reset_index()
     
     summaries = []
@@ -76,14 +76,19 @@ def summarize_comments(df):
         summary_prompt = (
             f"Summarize the following comments related to {row['LEAF_FUNC_DESC']}. "
             "Capture key insights, main drivers, and significant impacts. Ensure clarity and remove "
-            "redundancy while preserving essential details. Provide the summary in paragraph format."
-            f" {row['COMMENT']}"
+            "redundancy while preserving essential details. Provide the summary in a single paragraph. "
+            f"{row['COMMENT']}"
         )
         response = llm.invoke(summary_prompt)
-        summary_content = response.content if hasattr(response, "content") else str(response)
-        summaries.append(f"{row['LEAF_FUNC_DESC']}: {summary_content}")
-    
+        summary_content = getattr(response, "content", str(response))  # Ensure we get the full response
+        
+        # Format as "LEAF_FUNC_DESC: summary."
+        summaries.append(f"{row['LEAF_FUNC_DESC']}: {summary_content.strip()}.")
+
+    # Join summaries into a single paragraph
     summary_text = " ".join(summaries)
+
+    # Return summary as a new row
     return pd.DataFrame([{ "LEAF_FUNC_DESC": "Summary", "COMMENT": summary_text }])
 
 
