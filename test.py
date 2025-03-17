@@ -93,6 +93,19 @@ def summarize_comments(df):
     summary_text = " ".join(summaries)
     return pd.DataFrame([{ "LEAF_FUNC_DESC": "Summary", "COMMENT": summary_text }])
 
+def save_to_csv(df):
+    """Saves the DataFrame to a CSV file in the output_files folder with an incremental filename."""
+    output_dir = "output_files"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    file_number = 1
+    while os.path.exists(os.path.join(output_dir, f"cleaned_commentary{file_number}.csv")):
+        file_number += 1
+    
+    file_path = os.path.join(output_dir, f"cleaned_commentary{file_number}.csv")
+    df.to_csv(file_path, index=False)
+    print(f"\nData saved to {file_path}")
+    
 def main():
     """Main function to fetch, clean data, summarize comments, and print results."""
     filters = get_user_filters()
@@ -107,8 +120,7 @@ def main():
         df = pd.concat([df, summary_df], ignore_index=True)
     
     # Save to CSV
-    df.to_csv("cleaned_commentary.csv", index=False)
-    print("\nData saved to cleaned_commentary.csv")
+    save_to_csv(df)
 
 if __name__ == "__main__":
     main()
