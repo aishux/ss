@@ -103,6 +103,7 @@ def main(filters=None):
     if not df.empty:
         summary = summarize_comments(df)
         summary_row = df.iloc[0].copy()
+        summary_df["CREATED_ON"] = datetime.now().strftime("%d/%m/%Y %H:%M")
         summary_row["COMMENT"] = summary
         df = pd.concat([df, pd.DataFrame([summary_row])], ignore_index=True)
     
