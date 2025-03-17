@@ -71,19 +71,20 @@ def summarize_comments(df):
     """Summarizes comments based on LEAF_FUNC_DESC."""
     grouped_comments = df.groupby("LEAF_FUNC_DESC")["COMMENT"].apply(lambda x: " ".join(x)).reset_index()
     
-    summary_list = []
+    summaries = []
     for _, row in grouped_comments.iterrows():
         summary_prompt = (
             f"Summarize the following comments related to {row['LEAF_FUNC_DESC']}. "
             "Capture key insights, main drivers, and significant impacts. Ensure clarity and remove "
             "redundancy while preserving essential details. Provide the summary in paragraph format."
-            f" {row['LEAF_FUNC_DESC']}: {row['COMMENT']}"
+            f" {row['COMMENT']}"
         )
         response = llm.invoke(summary_prompt)
         summary_content = response.content if hasattr(response, "content") else str(response)
-        summary_list.append({"LEAF_FUNC_DESC": row["LEAF_FUNC_DESC"], "COMMENT": summary_content})
+        summaries.append(f"{row['LEAF_FUNC_DESC']}: {summary_content}")
     
-    return pd.DataFrame(summary_list)
+    summary_text = " ".join(summaries)
+    return pd.DataFrame([{ "LEAF_FUNC_DESC": "Summary", "COMMENT": summary_text }])
 
 
 def main(filters=None):
