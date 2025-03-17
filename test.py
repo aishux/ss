@@ -80,12 +80,27 @@ def summarize_comments(df):
     
     summaries = []
     for _, row in grouped_comments.iterrows():
+        # Sample input and output to guide the model
+        sample_input = (
+            "The sales increased by 10% due to higher demand in the region. "
+            "The marketing campaign was successful, leading to a 15% increase in customer engagement. "
+            "However, supply chain issues caused a delay in product delivery."
+        )
+        sample_output = (
+            "The sales growth of 10% was driven by increased regional demand and a successful marketing campaign, "
+            "which boosted customer engagement by 15%. However, supply chain disruptions led to delays in product delivery."
+        )
+        
         summary_prompt = (
             f"Summarize the following comments related to {row['LEAF_FUNC_DESC']}. "
             "Capture key insights, main drivers, and significant impacts. Ensure clarity and remove "
             "redundancy while preserving essential details. Provide the summary in paragraph format. "
-            f"{row['COMMENT']}"
+            "Here is a sample input and output for reference:\n\n"
+            f"Sample Input: {sample_input}\n\n"
+            f"Sample Output: {sample_output}\n\n"
+            f"Now, summarize the following comments:\n{row['COMMENT']}"
         )
+        
         response = llm.invoke(summary_prompt)
         summary_content = response.content if hasattr(response, "content") else str(response)
         summaries.append(f"{row['LEAF_FUNC_DESC']}: {summary_content}")
