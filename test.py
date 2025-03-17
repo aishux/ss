@@ -68,10 +68,22 @@ def fetch_and_clean_data(filters=None):
 
 
 def summarize_comments(df):
-    """Summarizes comments for the retrieved dataset."""
-    summary_prompt = "Analyze the following financial commentary and generate a concise summary that captures the key insights, main drivers, and significant impacts mentioned. Ensure clarity and remove redundancy while preserving essential details.\n" + "\n".join(df["COMMENT"].tolist())
-    response = llm.invoke(summary_prompt)
-    return response.content.strip() if hasattr(response, "content") else str(response).strip()
+    """Summarizes comments based on LEAF_FUNC_DESC."""
+    grouped_comments = df.groupby("LEAF_FUNC_DESC")["COMMENT"].apply(lambda x: "\n".join(x)).reset_index()
+    
+    summary_list = []
+    for _, row in grouped_comments.iterrows():
+        summary_prompt = (
+            f"Summarize the following comments related to {row['LEAF_FUNC_DESC']}. "
+            "Capture key insights, main drivers, and significant impacts. Ensure clarity and remove "
+            "redundancy while preserving essential details. Provide the summary in paragraph format.\n\n"
+            f"Comments:\n{row['COMMENT']}"
+        )
+        response = llm.invoke(summary_prompt)
+        summary_content = response.content if hasattr(response, "content") else str(response)
+        summary_list.append({"LEAF_FUNC_DESC": row["LEAF_FUNC_DESC"], "COMMENT": summary_content})
+    
+    return pd.DataFrame(summary_list)
 
 
 def main(filters=None):
