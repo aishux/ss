@@ -1,13 +1,13 @@
 import os
 import pandas as pd
-import sqlalchemy
 import re
 import json
-from sqlalchemy.engine import create_engine
 from bs4 import BeautifulSoup
 from langchain_openai import AzureChatOpenAI
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
+from datetime import datetime
+from sqlalchemy.engine import create_engine
 
 # Azure Key Vault Configuration
 KEY_VAULT_NAME = "your-key-vault-name"
@@ -18,17 +18,7 @@ key_vault_url = f"https://{KEY_VAULT_NAME}.vault.azure.net"
 client = SecretClient(vault_url=key_vault_url, credential=credential)
 AZURE_OPENAI_KEY = client.get_secret(SECRET_NAME).value
 
-# Database Connection Setup
-DATABRICKS_SERVER = "your-databricks-server"
-DATABRICKS_HTTP_PATH = "your-databricks-http-path"
-DATABRICKS_TOKEN = "your-databricks-token"
-
-engine = create_engine(
-    f"databricks://token:{DATABRICKS_TOKEN}@{DATABRICKS_SERVER}:443/{DATABRICKS_HTTP_PATH}"
-)
-
 # Azure OpenAI Configuration
-AZURE_OPENAI_KEY = "your-api-key"
 AZURE_OPENAI_ENDPOINT = "your-openai-endpoint"
 AZURE_DEPLOYMENT_NAME = "your-deployment-name"
 
@@ -38,6 +28,14 @@ llm = AzureChatOpenAI(
     deployment_name=AZURE_DEPLOYMENT_NAME
 )
 
+# Databricks Connection Setup
+DATABRICKS_SERVER = "your-databricks-server"
+DATABRICKS_HTTP_PATH = "your-databricks-http-path"
+DATABRICKS_TOKEN = "your-databricks-token"
+
+engine = create_engine(
+    f"databricks://token:{DATABRICKS_TOKEN}@{DATABRICKS_SERVER}:443/{DATABRICKS_HTTP_PATH}"
+)
 
 def clean_html(comment):
     """Removes HTML tags, special characters, and ensures proper formatting."""
@@ -47,71 +45,71 @@ def clean_html(comment):
     text = re.sub(r"(\b\w+\b) \1", r"\1", text)  # Remove duplicate words
     return text
 
+def get_user_filters():
+    """Prompts user for filter inputs and returns a dictionary of filters."""
+    filters = {}
+    account_id = input("Enter ACCOUNT_ID (leave blank to skip): ").strip()
+    function_id = input("Enter FUNCTION_ID (leave blank to skip): ").strip()
+    
+    if account_id:
+        filters["ACCOUNT_ID"] = account_id
+    if function_id:
+        filters["FUNCTION_ID"] = function_id
+    
+    return filters if filters else None
 
 def fetch_and_clean_data(filters=None):
-    """Fetches commentary data, applies filters, and cleans HTML comments."""
-    base_query = """
-    SELECT ACCOUNT_ID, ACCOUNT_DESC, FUNCTION_ID, FUNCTION_DESC, REPORT_ID, PERIOD, 
-           REPORTING_DATE, REPORTING_VIEW, COMMENT
-    FROM PROVISION.CC_COMMENTARY_CUBE2_VW
-    """
-    
+    """Fetches commentary data from Databricks, applies filters, and cleans HTML comments."""
     if filters:
-        filter_conditions = " AND ".join([f"{key} = '{value}'" for key, value in filters.items()])
-        query = base_query + " WHERE " + filter_conditions
+        query = "SELECT * FROM PROVISION.CC_COMMENTARY_CUBE2_VW WHERE " + " AND ".join(
+            [f"{key} = '{value}'" for key, value in filters.items()]
+        )
     else:
-        query = base_query
+        query = """
+        SELECT ACCOUNT_ID, ACCOUNT_DESC, FUNCTION_ID, FUNCTION_DESC, REPORT_ID, PERIOD, 
+               REPORTING_DATE, REPORTING_VIEW, LEAF_FUNC_DESC, COMMENT, CREATED_BY, CREATED_ON
+        FROM PROVISION.CC_COMMENTARY_CUBE2_VW
+        """
     
     df = pd.read_sql(query, engine)
     df["COMMENT"] = df["COMMENT"].apply(clean_html)
-    return df, query
-
+    return df
 
 def summarize_comments(df):
     """Summarizes comments based on LEAF_FUNC_DESC in a single paragraph format."""
-    grouped_comments = df.groupby("LEAF_FUNC_DESC")["COMMENT"].apply(lambda x: " ".join(x)).reset_index()
+    grouped_comments = df.groupby("LEAF_FUNC_DESC")["COMMENT"].apply(lambda x: ". ".join(x)).reset_index()
     
     summaries = []
     for _, row in grouped_comments.iterrows():
         summary_prompt = (
             f"Summarize the following comments related to {row['LEAF_FUNC_DESC']}. "
             "Capture key insights, main drivers, and significant impacts. Ensure clarity and remove "
-            "redundancy while preserving essential details. Provide the summary in a single paragraph. "
+            "redundancy while preserving essential details. Provide the summary in paragraph format. "
             f"{row['COMMENT']}"
         )
         response = llm.invoke(summary_prompt)
-        summary_content = getattr(response, "content", str(response))  # Ensure we get the full response
-        
-        # Format as "LEAF_FUNC_DESC: summary."
-        summaries.append(f"{row['LEAF_FUNC_DESC']}: {summary_content.strip()}.")
-
-    # Join summaries into a single paragraph
+        summary_content = response.content if hasattr(response, "content") else str(response)
+        summaries.append(f"{row['LEAF_FUNC_DESC']}: {summary_content}")
+    
     summary_text = " ".join(summaries)
-
-    # Return summary as a new row
     return pd.DataFrame([{ "LEAF_FUNC_DESC": "Summary", "COMMENT": summary_text }])
 
-
-def main(filters=None):
+def main():
     """Main function to fetch, clean data, summarize comments, and print results."""
-    df, query = fetch_and_clean_data(filters)
-    print("Generated SQL Query:")
-    print(query)
+    filters = get_user_filters()
+    df = fetch_and_clean_data(filters)
     print("\nCleaned Data:")
     print(df.head())
     
     if not df.empty:
-        summary = summarize_comments(df)
-        summary_row = df.iloc[0].copy()
+        summary_df = summarize_comments(df)
+        summary_df["CREATED_BY"] = "AI_Generated"
         summary_df["CREATED_ON"] = datetime.now().strftime("%d/%m/%Y %H:%M")
-        summary_row["COMMENT"] = summary
-        df = pd.concat([df, pd.DataFrame([summary_row])], ignore_index=True)
+        df = pd.concat([df, summary_df], ignore_index=True)
     
     # Save to CSV
     df.to_csv("cleaned_commentary.csv", index=False)
     print("\nData saved to cleaned_commentary.csv")
 
-
 if __name__ == "__main__":
-    user_filters = {"ACCOUNT_ID": "U52100", "FUNCTION_ID": "N0000"}  # Example filters
-    main(filters=user_filters)
+    main()
