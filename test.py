@@ -47,14 +47,13 @@ def clean_html(comment):
 
 def get_user_filters():
     """Prompts user for filter inputs and returns a dictionary of filters."""
+    filter_columns = ["ACCOUNT_ID", "FUNCTION_ID", "REPORT_ID", "PERIOD", "LEAF_FUNC_DESC"]
     filters = {}
-    account_id = input("Enter ACCOUNT_ID (leave blank to skip): ").strip()
-    function_id = input("Enter FUNCTION_ID (leave blank to skip): ").strip()
     
-    if account_id:
-        filters["ACCOUNT_ID"] = account_id
-    if function_id:
-        filters["FUNCTION_ID"] = function_id
+    for column in filter_columns:
+        value = input(f"Enter {column} (leave blank to skip): ").strip()
+        if value:
+            filters[column] = value
     
     return filters if filters else None
 
