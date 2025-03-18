@@ -18,7 +18,8 @@ else
             ;;
         *)
             echo "Processing generic feed: $feedName"
-            feedNameRegex="^$feedName[-_][0-9]{8}(-[0-9]+)?\.csv\.gz$"
+            # Ensure "GPCCLI-D-GEN-DIM" is not included
+            feedNameRegex="^(?!GPCCLI-D-GEN-DIM)$feedName[-_][0-9]{8}(-[0-9]+)?\.csv\.gz$"
             ;;
     esac
 fi
