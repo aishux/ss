@@ -1,19 +1,10 @@
-Subject: Request for Table Column Details
+Subject: Filename Change in Production – GPCCLI-D-GEN-DIM to GPCCLI-D-GEN_DIM
 
-Hi [User's Name],
+Hi Alicia,
 
-I hope you're doing well.
+As discussed on the call, we request the filename change in production from GPCCLI-D-GEN-DIM to GPCCLI-D-GEN_DIM, as the hyphen was causing issues on our end.
 
-To ensure seamless integration and accurate usage of the [Table Name] table, could you please provide the following details for each column?
-
-Column Purpose – Brief description of what the column represents.
-Data Type & Format – If not obvious (e.g., currency, JSON).
-Unit of Measurement – If applicable (e.g., kg, USD).
-Source/Derivation – If computed or coming from another table.
-Key Constraints – Primary/foreign key, uniqueness, etc.
-Special Values/NULL Handling – Meaning of NULLs or default values.
-Example Values – Common or expected values.
-This will help ensure clarity and correctness in our implementation. Let me know if you need any clarification. Looking forward to your response.
+We have already made this change in SIT, and it is scheduled to be released to PROD on Friday. Please let us know once the update is implemented on your side or if any further details are needed.
 
 Thanks,
 [Your Name]
