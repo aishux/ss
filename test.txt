@@ -6,5 +6,9 @@ The code file
 An Excel sheet explaining the input and output of the implementation
 This should help validate the approach. Since I will be on leave, please review the implementation, and we can plan the full-fledged framework once I’m back on Monday. Let me know if you have any queries, and I’ll address them after my return.
 
+This should help validate the approach. We can plan and work on the full-fledged framework once I’m back on Monday. Meanwhile, let me know if you have any queries or require any modifications.
+
+Looking forward to connecting through the week.
+
 Best,
 [Your Name]
