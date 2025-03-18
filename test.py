@@ -121,6 +121,10 @@ def save_to_csv(df):
     df.to_csv(file_path, index=False)
     print(f"\nData saved to {file_path}")
     
+def write_summary_to_databricks(summary_df):
+    """Writes the summary row back to the Databricks table etl.frs_gf."""
+    summary_df.to_sql("frs_gf", engine, schema="etl", if_exists="append", index=False)
+
 def main():
     """Main function to fetch, clean data, summarize comments, and print results."""
     filters = get_user_filters()
@@ -133,9 +137,16 @@ def main():
         summary_df["CREATED_BY"] = "AI_Generated"
         summary_df["CREATED_ON"] = datetime.now().strftime("%d/%m/%Y %H:%M")
         df = pd.concat([df, summary_df], ignore_index=True)
+        
+        # Write summary row back to Databricks
+        write_summary_to_databricks(summary_df)
     
     # Save to CSV
-    save_to_csv(df)
+    df.to_csv("cleaned_commentary.csv", index=False)
+    print("\nData saved to cleaned_commentary.csv")
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
