@@ -5,20 +5,27 @@ if [[ $feedName == *.ctl ]]; then
 else
     case "$feedName" in
         "GPCCLI-D-GEN") 
-            feedNameRegex="GPCCLI-D-GEN-[0-9]{8}(-[0-9]+)?\.csv\.gz"
+            echo "Processing feed: GPCCLI-D-GEN"
+            feedNameRegex="^GPCCLI-D-GEN-[0-9]{8}(-[0-9]+)?\.csv\.gz$"
             ;;
         "GPCCLI-D-GEN-DIM") 
-            feedNameRegex="GPCCLI-D-GEN-DIM-[0-9]{8}(-[0-9]+)?\.csv\.gz"
+            echo "Processing feed: GPCCLI-D-GEN-DIM"
+            feedNameRegex="^GPCCLI-D-GEN-DIM-[0-9]{8}(-[0-9]+)?\.csv\.gz$"
             ;;
         "GPCCLI-D-GEN_AUDIT") 
-            feedNameRegex="GPCCLI-D-GEN_AUDIT-[0-9]{8}(-[0-9]+)?\.csv\.gz"
+            echo "Processing feed: GPCCLI-D-GEN_AUDIT"
+            feedNameRegex="^GPCCLI-D-GEN_AUDIT-[0-9]{8}(-[0-9]+)?\.csv\.gz$"
             ;;
         *)
-            feedNameRegex="$feedName-[0-9]{8}(-[0-9]+)?\.csv\.gz"  # Generic match for other files
+            echo "Processing generic feed: $feedName"
+            feedNameRegex="^$feedName[-_][0-9]{8}(-[0-9]+)?\.csv\.gz$"
             ;;
     esac
 fi
 
 expectedFeeds=$2
+
+# Debugging: Show regex being used
+echo "Using regex: $feedNameRegex"
 
 all=$(echo "$allFilesFilt" | grep -E "$feedNameRegex")
