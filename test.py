@@ -1,24 +1,30 @@
-import pandas as pd
-from sqlalchemy import create_engine
+import os
+from databricks.connect import DatabricksSession
+from pyspark.sql import SparkSession
 
-# Databricks connection details
-DATABRICKS_HOST = "your-databricks-instance"  # Example: dbc-xxxxxxxx.cloud.databricks.com
-DATABRICKS_TOKEN = "your-access-token"
-DATABRICKS_HTTP_PATH = "your-http-path"
-DATABASE_NAME = "default"
-TABLE_NAME = "users"
+# Set Databricks Connect configuration inline
+os.environ["DATABRICKS_HOST"] = "https://dbc-xxxxxxxx.cloud.databricks.com"  # Replace with your Databricks workspace URL
+os.environ["DATABRICKS_TOKEN"] = "your-access-token"  # Replace with your Databricks personal access token
+os.environ["DATABRICKS_CLUSTER_ID"] = "your-cluster-id"  # Replace with your Databricks cluster ID
+os.environ["DATABRICKS_HTTP_PATH"] = "/sql/1.0/warehouses/your-warehouse-id"  # (Optional) For Databricks SQL warehouses
 
-# JDBC connection URL
-jdbc_url = f"databricks+connector://token:{DATABRICKS_TOKEN}@{DATABRICKS_HOST}:443/{DATABASE_NAME}"
+# Initialize Databricks Connect session
+spark = DatabricksSession.builder.getOrCreate()
 
-# Create SQLAlchemy engine
-engine = create_engine(jdbc_url)
+# Sample DataFrame
+data = [(1, "Alice", 25), (2, "Bob", 30), (3, "Charlie", 35)]
+columns = ["id", "name", "age"]
+df = spark.createDataFrame(data, columns)
 
-# Sample Pandas DataFrame
-data = {"id": [1, 2, 3], "name": ["Alice", "Bob", "Charlie"], "age": [25, 30, 35]}
-df = pd.DataFrame(data)
+# Define database and table name
+database_name = "default"  # Change as needed
+table_name = "users"
+full_table_name = f"{database_name}.{table_name}"
 
-# Write DataFrame to Databricks table
-df.to_sql(TABLE_NAME, con=engine, if_exists="replace", index=False)
+# Write DataFrame to Databricks as a Delta table
+df.write \
+    .format("delta") \
+    .mode("overwrite") \
+    .saveAsTable(full_table_name)
 
-print(f"Table {DATABASE_NAME}.{TABLE_NAME} saved successfully.")
+print(f"Table {full_table_name} saved successfully.")
