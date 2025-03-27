@@ -1,26 +1,24 @@
-from pyspark.sql import SparkSession
+import pandas as pd
+from sqlalchemy import create_engine
 
-# Initialize a Spark session
-spark = SparkSession.builder \
-    .appName("Databricks_Write") \
-    .config("spark.sql.catalogImplementation", "hive") \
-    .enableHiveSupport() \
-    .getOrCreate()
+# Databricks connection details
+DATABRICKS_HOST = "your-databricks-instance"  # Example: dbc-xxxxxxxx.cloud.databricks.com
+DATABRICKS_TOKEN = "your-access-token"
+DATABRICKS_HTTP_PATH = "your-http-path"
+DATABASE_NAME = "default"
+TABLE_NAME = "users"
 
-# Sample DataFrame
-data = [(1, "Alice", 25), (2, "Bob", 30), (3, "Charlie", 35)]
-columns = ["id", "name", "age"]
-df = spark.createDataFrame(data, columns)
+# JDBC connection URL
+jdbc_url = f"databricks+connector://token:{DATABRICKS_TOKEN}@{DATABRICKS_HOST}:443/{DATABASE_NAME}"
 
-# Define database and table name
-database_name = "default"  # Change this to your database name if needed
-table_name = "users"
-full_table_name = f"{database_name}.{table_name}"
+# Create SQLAlchemy engine
+engine = create_engine(jdbc_url)
 
-# Write DataFrame to Databricks as a table
-df.write \
-    .format("delta") \
-    .mode("overwrite") \
-    .saveAsTable(full_table_name)
+# Sample Pandas DataFrame
+data = {"id": [1, 2, 3], "name": ["Alice", "Bob", "Charlie"], "age": [25, 30, 35]}
+df = pd.DataFrame(data)
 
-print(f"Table {full_table_name} saved successfully.")
+# Write DataFrame to Databricks table
+df.to_sql(TABLE_NAME, con=engine, if_exists="replace", index=False)
+
+print(f"Table {DATABASE_NAME}.{TABLE_NAME} saved successfully.")
