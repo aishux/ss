@@ -1,1 +1,36 @@
+Hi [Lead's Name],
+
+As requested, I’m sharing the prompt I used for the Commentary Agent below. Since I didn’t receive specific input or guidance from the business team, I proceeded with a generic prompt aimed at summarising comments in a concise and structured manner.
+
+Prompt Used:
+“Summarise the following comment in a concise and business-friendly manner, highlighting key insights and actions where applicable.”
+
+Additionally, I noticed that the input dataset contains only one comment per Business Function. This may be limiting the summarisation capabilities of the AI, as it ends up collating the individual comment rather than producing a meaningful summary across multiple inputs.
+
+Happy to refine the prompt further if more context becomes available or if we can get richer data.
+
+Best regards,
+[Your Name]
+
+#########################
+
+Hi [Lead's Name],
+
+Just sharing the prompt I used for the Commentary Agent, as discussed. Since I didn’t get any specific inputs from the business team, I went ahead with a generic one to summarise the comments in a clear, business-friendly way.
+
+Prompt:
+“Summarise the following comment in a concise and business-friendly manner, highlighting key insights and actions where applicable.”
+
+One thing I noticed – the dataset seems to have just one comment per Business Function. Because of that, the AI doesn’t really get a chance to “summarise” multiple points—it mostly just rephrases or collates the single input. That could be something we look into if we want richer summaries.
+
+Let me know if you'd like me to tweak the prompt or try a different approach.
+
+Thanks,
+[Your Name]
+
+#########################
+
+One thing I noticed – the dataset currently has only one comment per Business Function. With such limited data, it’s hard to properly test the AI’s summarisation capabilities, as it ends up just rewording the single input. It would be ideal to have more data from Avi and team first, and then see how well the AI performs with a richer dataset.
+
+Happy to tweak the prompt or approach once we have that.
 
