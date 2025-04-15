@@ -34,3 +34,6 @@ One thing I noticed – the dataset currently has only one comment per Business 
 
 Happy to tweak the prompt or approach once we have that.
 
+#########################
+
+To get better results, we could either refine the prompt further or ideally work with a more detailed dataset from Avi and team.
