@@ -1,33 +1,24 @@
-import os
-from pyspark.sql import SparkSession
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.keys import KeyClient
 
-# Set Databricks Connect configuration inline
-os.environ["DATABRICKS_HOST"] = "https://dbc-xxxxxxxx.cloud.databricks.com"  # Replace with your Databricks workspace URL
-os.environ["DATABRICKS_TOKEN"] = "your-access-token"  # Replace with your personal access token
-os.environ["DATABRICKS_CLUSTER_ID"] = "your-cluster-id"  # Replace with your cluster ID
-os.environ["DATABRICKS_HTTP_PATH"] = "/sql/1.0/warehouses/your-warehouse-id"  # (Optional) For Databricks SQL warehouses
+# Replace with your Key Vault name
+key_vault_url = "https://<your-key-vault-name>.vault.azure.net/"
 
-# Initialize a Spark session
-spark = SparkSession.builder \
-    .appName("Databricks_Write") \
-    .config("spark.sql.catalogImplementation", "hive") \
-    .enableHiveSupport() \
-    .getOrCreate()
+# Authenticate and create client
+credential = DefaultAzureCredential()
+key_client = KeyClient(vault_url=key_vault_url, credential=credential)
 
-# Sample DataFrame
-data = [(1, "Alice", 25), (2, "Bob", 30), (3, "Charlie", 35)]
-columns = ["id", "name", "age"]
-df = spark.createDataFrame(data, columns)
+# List all keys in the Key Vault
+print("Listing keys:")
+keys = key_client.list_properties_of_keys()
+for key_prop in keys:
+    print(f"- {key_prop.name}")
 
-# Define database and table name
-database_name = "default"  # Change this to your database name if needed
-table_name = "users"
-full_table_name = f"{database_name}.{table_name}"
+# Get a specific key (replace with an actual key name)
+key_name = "<your-key-name>"
+key = key_client.get_key(key_name)
 
-# Write DataFrame to Databricks as a table
-df.write \
-    .format("delta") \
-    .mode("overwrite") \
-    .saveAsTable(full_table_name)
-
-print(f"Table {full_table_name} saved successfully.")
+print("\nKey details:")
+print(f"Name: {key.name}")
+print(f"Type: {key.key_type}")
+print(f"Version: {key.properties.version}")
