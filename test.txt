@@ -1,3 +1,15 @@
-I have refactored the code to make it as generic as possible, allowing it to work with any table passed as input. The logic has been modularized, and key components such as summarization and data fetching are now adaptable based on the table structure.
+Subject: Work Allocation and Availability Across Pods
 
-This version is designed to be flexible and scalable, and I’ve kept the summarization logic dynamic based on the aggregation_set and leaf_func_desc fields. As more use cases arise, I’ll continue refining it further to support additional table formats and summarization needs.
+Hi [Manager's Name/Team],
+
+As per the recent discussion and mutual agreement between the AI and GMIS pod management, I will now be splitting my work time equally between both pods.
+
+To ensure smooth collaboration and clarity, I will be dedicating my time as follows:
+
+10:30 AM to 3:30 PM – GMIS Pod
+
+Post 3:30 PM – AI Pod
+
+During my allocated time with the AI pod, I may not be available for GMIS-related tasks. If any assistance is required during that time, please feel free to reach out to Karthi, Sergio, or McDon, as they are well-versed with the project and can provide the necessary support.
+
+Thanks for your understanding and cooperation!
