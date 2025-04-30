@@ -1,15 +1,28 @@
-Subject: Work Allocation and Availability Across Pods
+Hi [Name],
 
-Hi [Manager's Name/Team],
+Just a quick update — I’ll be on leave from tomorrow and will be back on Monday.
 
-As per the recent discussion and mutual agreement between the AI and GMIS pod management, I will now be splitting my work time equally between both pods.
+Out of the five tasks you assigned, I’ve completed one. Here's the list of tasks as per my understanding:
 
-To ensure smooth collaboration and clarity, I will be dedicating my time as follows:
+[Task 1 – Completed]
 
-10:30 AM to 3:30 PM – GMIS Pod
+[Task 2]
 
-Post 3:30 PM – AI Pod
+[Task 3]
 
-During my allocated time with the AI pod, I may not be available for GMIS-related tasks. If any assistance is required during that time, please feel free to reach out to Karthi, Sergio, or McDon, as they are well-versed with the project and can provide the necessary support.
+[Task 4]
 
-Thanks for your understanding and cooperation!
+[Task 5]
+
+I’ve pushed the code changes to the following branch:
+[branch-name]
+
+To run the code, you can use the following keys:
+[list the keys here]
+
+Please note: You’ll need to install the databricks-connect library before running the code.
+
+Let me know if anything’s unclear. Thanks!
+
+Best regards,
+[Your Name]
