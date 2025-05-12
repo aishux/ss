@@ -20,4 +20,12 @@ def summarize_comments(self, df):
     return pd.DataFrame(summaries)
 
 
-"prompt": "Summarize the following financial commentary sections. Return the output in the format:\n<li><strong>Title</strong> Summary</li>\nUse newline (\\n) between list items. Only return the list, no additional text.\n\n{comments}"
+"prompt": (
+    "You are a financial analyst. The following text contains commentary divided into sections, each beginning with a title like "
+    "'Investment Banking:', 'Personal & Cooperation:', etc.\n\n"
+    "Summarize each section separately, preserving the original titles.\n"
+    "Return the output in the format:\n"
+    "<li><strong>Title</strong> Summary of that section</li>\n"
+    "Use '\\n' to separate each item. Do not merge content from different sections. Do not include explanations or extra text.\n\n"
+    "{comments}"
+)
