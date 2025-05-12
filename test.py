@@ -20,5 +20,4 @@ def summarize_comments(self, df):
     return pd.DataFrame(summaries)
 
 
-"prompt": ""prompt": "Summarize the following structured financial commentary. Retain the original plain formatting with each section starting as Title: Comment. Do not use bold, italics, or any markdown:\n\n{comments}"
-"
+"prompt": "Summarize the following financial commentary sections. Return the output in the format:\n<li><strong>Title</strong> Summary</li>\nUse newline (\\n) between list items. Only return the list, no additional text.\n\n{comments}"
