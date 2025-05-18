@@ -1,35 +1,62 @@
-import os
-import yaml
-import json
+def summarize_comments(self, df):
+    summaries = []
+    prompt_template = PROMPTS.get(self.business_division, PROMPTS["DEFAULT"])['prompt']
 
-class SummationAgent:
-    def __init__(self, env_name, business_division, ...):  # include other parameters
-        self.env_name = env_name.lower()
-        self.business_division = business_division.lower()
+    clubbed_comments = []
+    batch_rows = []
+    MAX_PER_BATCH = 500
 
-        self.load_config_and_prompts()
+    for _, row in df.iterrows():
+        clubbed_comments.append(row['COMMENT'].strip())
+        batch_rows.append(row.to_dict())
 
-        self.table_name = self.config["commentary_summation"]["table_name"]
-        self.columns = self.config["commentary_summation"]["columns"]
-        self.output_table = self.config["commentary_summation"]["output_table"]
-        self.prompt_template = self.prompts.get(f"{self.business_division.upper()}_summation_prompt")
+        # once we hit 500 comments, or at end of df
+        if len(clubbed_comments) == MAX_PER_BATCH:
+            # 1) build prompt for the batch
+            prompt = prompt_template.format(comments="\n".join(clubbed_comments))
 
-        # Continue with any other init logic (LLM, engine, etc.)
+            # 2) call the LLM
+            response = self.llm.invoke(prompt)
+            text = getattr(response, "content", str(response))
+            summary_lines = [s.strip() for s in text.split("\n") if s.strip()]
 
-    def load_config_and_prompts(self):
-        # Go two levels up from summation_agent.py to reach project_root
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            # 3) map each summary line back to the corresponding original row
+            for original, summary in zip(batch_rows, summary_lines):
+                updated = original.copy()
+                updated["COMMENT"] = summary
+                updated["CREATED_BY"] = "AI_Generated"
+                updated["CREATED_ON"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+                summaries.append(updated)
 
-        config_base_path = os.path.join(
-            project_root, "configs", self.env_name, self.business_division
-        )
-        config_path = os.path.join(config_base_path, "config.yaml")
-        prompts_path = os.path.join(config_base_path, "prompts.json")
+            # 4) reset for the next batch
+            clubbed_comments = []
+            batch_rows = []
 
-        # Load YAML config
-        with open(config_path, "r") as f:
-            self.config = yaml.safe_load(f)
+    # Handle the last partial batch (if any remain)
+    if clubbed_comments:
+        prompt = prompt_template.format(comments="\n".join(clubbed_comments))
+        response = self.llm.invoke(prompt)
+        text = getattr(response, "content", str(response))
+        summary_lines = [s.strip() for s in text.split("\n") if s.strip()]
 
-        # Load JSON prompts
-        with open(prompts_path, "r") as f:
-            self.prompts = json.load(f)
+        for original, summary in zip(batch_rows, summary_lines):
+            updated = original.copy()
+            updated["COMMENT"] = summary
+            updated["CREATED_BY"] = "AI_Generated"
+            updated["CREATED_ON"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+            summaries.append(updated)
+
+    return pd.DataFrame(summaries)
+
+
+
+"prompt": (
+    "You are a financial analyst. The following text contains commentary divided into sections, each beginning with a title like "
+    "'Investment Banking:', 'Personal & Cooperation:', etc.\n\n"
+    "Summarize each section separately, preserving the original titles.\n"
+    "Return the output in the format:\n"
+    "<li><strong>Title</strong> Summary of that section</li>\n"
+    "Use '\\n' to separate each item. Do not merge content from different sections. Do not include explanations or extra text.\n\n"
+    "Below are the 500 comments each seperated by '\\n' and you have to output the summarizations for each section as per the given format above and seperated by '\\n' without any extra explanation\n\n"
+    "{comments}"
+)
