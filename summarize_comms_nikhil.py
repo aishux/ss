@@ -1,64 +1,66 @@
-import ast
+import json
 
 def summarize_comments(self, df):
     summaries = []
     prompt_template = PROMPTS.get(self.business_division, PROMPTS["DEFAULT"])['prompt']
 
-    clubbed_comments = []
-    batch_rows = []
+    comment_dict = {}
+    row_mapping = {}
     MAX_PER_BATCH = 500
 
-    for _, row in df.iterrows():
-        clubbed_comments.append(row['COMMENT'].strip())
-        batch_rows.append(row.to_dict())
+    for idx, row in df.iterrows():
+        row_id = str(row["aggregation_set"])
+        comment_dict[row_id] = row["COMMENT"].strip()
+        row_mapping[row_id] = row.to_dict()
 
-        # once we hit 500 comments, or at end of df
-        if len(clubbed_comments) == MAX_PER_BATCH:
-            # 1) build prompt for the batch
-            prompt = prompt_template.format(comments=clubbed_comments)
+        # Process when batch is full
+        if len(comment_dict) == MAX_PER_BATCH:
+            summaries.extend(self._process_batch(prompt_template, comment_dict, row_mapping))
+            comment_dict.clear()
+            row_mapping.clear()
 
-            # 2) call the LLM
-            response = self.llm.invoke(prompt)
-            text = getattr(response, "content", str(response))
-            summary_lines = ast.literal_eval(text)
-
-            # 3) map each summary line back to the corresponding original row
-            for original, summary in zip(batch_rows, summary_lines):
-                updated = original.copy()
-                updated["COMMENT"] = summary
-                updated["CREATED_BY"] = "AI_Generated"
-                updated["CREATED_ON"] = datetime.now().strftime("%d/%m/%Y %H:%M")
-                summaries.append(updated)
-
-            # 4) reset for the next batch
-            clubbed_comments = []
-            batch_rows = []
-
-    # Handle the last partial batch (if any remain)
-    if clubbed_comments:
-        prompt = prompt_template.format(comments=clubbed_comments)
-        response = self.llm.invoke(prompt)
-        text = getattr(response, "content", str(response))
-        summary_lines = ast.literal_eval(text)
-
-        for original, summary in zip(batch_rows, summary_lines):
-            updated = original.copy()
-            updated["COMMENT"] = summary
-            updated["CREATED_BY"] = "AI_Generated"
-            updated["CREATED_ON"] = datetime.now().strftime("%d/%m/%Y %H:%M")
-            summaries.append(updated)
+    # Handle last partial batch
+    if comment_dict:
+        summaries.extend(self._process_batch(prompt_template, comment_dict, row_mapping))
 
     return pd.DataFrame(summaries)
+
+def _process_batch(self, prompt_template, comment_dict, row_mapping):
+    prompt = prompt_template.format(comments=json.dumps(comment_dict, indent=2))
+    response = self.llm.invoke(prompt)
+    text = getattr(response, "content", str(response))
+
+    try:
+        summary_dict = json.loads(text)
+    except Exception as e:
+        raise ValueError(f"Failed to parse LLM output: {text[:300]}...\nError: {e}")
+
+    batch_summaries = []
+    for row_id in comment_dict.keys():
+        original = row_mapping.get(row_id)
+        summary = summary_dict.get(row_id)
+
+        if not summary:
+            # Log missing or empty summary
+            print(f"Missing or empty summary for rowId: {row_id}")
+            summary = "[Summary Missing]"
+
+        updated = original.copy()
+        updated["COMMENT"] = summary
+        updated["CREATED_BY"] = "AI_Generated"
+        updated["CREATED_ON"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+        batch_summaries.append(updated)
+
+    return batch_summaries
 
 
 
 "prompt": (
-    "You are a financial analyst. The following text contains commentary divided into sections, each beginning with a title like "
-    "'Investment Banking:', 'Personal & Cooperation:', etc.\n\n"
-    "Summarize each section separately, preserving the original titles.\n"
+    "You are a financial analyst."
+    "Summarize each comment, preserving the original titles.\n"
     "Return the output in the format:\n"
     "<li><strong>Title</strong> Summary of that section</li>\n"
     "Use '\\n' to separate each item. Do not merge content from different sections. Do not include explanations or extra text.\n\n"
-    "Below is the list of comments and you have to output the summarizations for each comment as per the given requirements above in list format. Make sure that the index of the input comment and the output summarizations are same without any extra explanation\n\n"
+    "Below is the dictionary of comments and you have to output the summarizations.Return the output as a single JSON object without any extra explanation\n\n"
     "{comments}"
 )
