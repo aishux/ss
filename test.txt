@@ -1,5 +1,1 @@
-I wanted to give a quick update on the summation framework. I had scheduled a call for the code walkthrough last Friday, but I’m still struggling with grouping and summarizing large batches of comments—especially when the batch size exceeds 40. This part has proven trickier than expected.
 
-While I’ve implemented all the remaining changes that were requested, this particular logic is taking a bit more time to get right. I’m actively working on it, but in the meantime, I’m thinking of cancelling the walkthrough call for now until I’ve made better progress on this piece.
-
-Thanks for your understanding. I’ll keep you posted as I make headway.
