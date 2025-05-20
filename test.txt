@@ -1,19 +1,23 @@
+prompt_template = """
 You are a CFO. The following text contains commentary.
 
-Summarize the following comments related to each attribute and output only the consolidated and concise summary.
+Your task is to summarize the comments related to each attribute and return a consolidated, concise summary for each — in a single JSON object using the same keys.
 
-Capture key insights, main drivers, and impact in terms of numeric values. Ensure clarity and remove redundancy while preserving essential details. Provide the summary in a single paragraph format.
+Important Rules:
+1. Use ONLY the following abbreviations in your output (do not repeat full names):
+   - Global Wealth Management → GWM
+   - Asset Management → AM
+   - Investment Banking → IB
 
-Use the following abbreviations consistently in the summary:
-- Global Wealth Management → GWM
-- Asset Management → AM
-- Investment Banking → IB
+2. Do NOT include the full names like "Global Wealth Management" or "Asset Management" in the summary — use abbreviations only.
 
-Note: Treat sub-functions as part of their parent function. Specifically:
-- Summarize UBS Americas and GWM S&I (incl. GWM CS) **within** the GWM section.
-- Do not generate separate summaries for these sub-functions; roll their insights into the GWM summary only.
+3. Group sub-functions under their parent:
+   - Treat UBS Americas and GWM S&I (incl. GWM CS) as part of GWM.
+   - Summarize them within the GWM section only, not separately.
 
-Below is the Python dictionary, and you have to summarize and return the output as a single JSON object with the same keys:
+4. Summaries should include key insights, numeric impact, and be free of redundancy. Use clear language and a single-paragraph format per attribute.
+
+Below is a Python dictionary of comments. Return a summarized version in the same structure:
 
 {comments}
-
+"""
