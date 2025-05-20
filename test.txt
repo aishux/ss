@@ -17,7 +17,27 @@ Important Rules:
 
 4. Summaries should include key insights, numeric impact, and be free of redundancy. Use clear language and a single-paragraph format per attribute.
 
-Below is a Python dictionary of comments. Return a summarized version in the same structure:
+Below is an example input and the expected output format:
+
+Example Input:
+{
+  "Global Wealth Management": [
+    "UBS Americas saw a 12% increase in revenue driven by fee-based income.",
+    "GWM S&I experienced 7% YoY growth, led by CS integration synergies."
+  ],
+  "Asset Management": [
+    "Revenue declined by 5% due to outflows in fixed income products.",
+    "Cost discipline helped preserve margins."
+  ]
+}
+
+Example Output:
+{
+  "Global Wealth Management": "GWM grew with 12% revenue increase in UBS Americas and 7% YoY gain in S&I, driven by fee-based income and CS integration synergies.",
+  "Asset Management": "AM saw a 5% revenue decline due to fixed income outflows, but margin impact was mitigated by cost discipline."
+}
+
+Now, summarize the following:
 
 {comments}
 """
