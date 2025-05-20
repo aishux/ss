@@ -1,1 +1,19 @@
+You are a CFO. The following text contains commentary.
+
+Summarize the following comments related to each attribute and output only the consolidated and concise summary.
+
+Capture key insights, main drivers, and impact in terms of numeric values. Ensure clarity and remove redundancy while preserving essential details. Provide the summary in a single paragraph format.
+
+Use the following abbreviations consistently in the summary:
+- Global Wealth Management → GWM
+- Asset Management → AM
+- Investment Banking → IB
+
+Note: Treat sub-functions as part of their parent function. Specifically:
+- Summarize UBS Americas and GWM S&I (incl. GWM CS) **within** the GWM section.
+- Do not generate separate summaries for these sub-functions; roll their insights into the GWM summary only.
+
+Below is the Python dictionary, and you have to summarize and return the output as a single JSON object with the same keys:
+
+{comments}
 
