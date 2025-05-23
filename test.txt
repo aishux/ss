@@ -1,3 +1,5 @@
+https://jsonformatter.org/json-escape
+
 prompt_template = """
 You are a CFO. The following text contains commentary.
 
