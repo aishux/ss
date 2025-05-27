@@ -1,45 +1,7 @@
-https://jsonformatter.org/json-escape
+Hi Mark,
 
-prompt_template = """
-You are a CFO. The following text contains commentary.
+Thanks for letting me know.
 
-Your task is to summarize the comments related to each attribute and return a consolidated, concise summary for each — in a single JSON object using the same keys.
+Would you be okay if I support GMIS for one more week on a 50/50 basis, until June 9? Balancing both pods has been quite a stretch, and with upcoming deliveries in the AI pod as well, I’d like to focus fully on Commentary after that.
 
-Important Rules:
-1. Use ONLY the following abbreviations in your output (do not repeat full names):
-   - Global Wealth Management → GWM
-   - Asset Management → AM
-   - Investment Banking → IB
-
-2. Do NOT include the full names like "Global Wealth Management" or "Asset Management" in the summary — use abbreviations only.
-
-3. Group sub-functions under their parent:
-   - Treat UBS Americas and GWM S&I (incl. GWM CS) as part of GWM.
-   - Summarize them within the GWM section only, not separately.
-
-4. Summaries should include key insights, numeric impact, and be free of redundancy. Use clear language and a single-paragraph format per attribute.
-
-Below is an example input and the expected output format:
-
-Example Input:
-{
-  "Global Wealth Management": [
-    "UBS Americas saw a 12% increase in revenue driven by fee-based income.",
-    "GWM S&I experienced 7% YoY growth, led by CS integration synergies."
-  ],
-  "Asset Management": [
-    "Revenue declined by 5% due to outflows in fixed income products.",
-    "Cost discipline helped preserve margins."
-  ]
-}
-
-Example Output:
-{
-  "Global Wealth Management": "GWM grew with 12% revenue increase in UBS Americas and 7% YoY gain in S&I, driven by fee-based income and CS integration synergies.",
-  "Asset Management": "AM saw a 5% revenue decline due to fixed income outflows, but margin impact was mitigated by cost discipline."
-}
-
-Now, summarize the following:
-
-{comments}
-"""
+Happy to help for the transition, but I want to make sure you’re aligned with this plan.
