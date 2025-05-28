@@ -1,1 +1,7 @@
+Hi [User's Name],
 
+I’ve picked a test case and run the query for it—attaching the input and output here so you can have a quick look before our call.
+
+Let me know if you have any questions!
+
+Best,
