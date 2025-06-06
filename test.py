@@ -1,8 +1,9 @@
 import subprocess
+import sys
 
 def safe_run(command, description):
     try:
-        print(f"Running: {description}")
+        print(f"\n🚀 Running: {description}")
         subprocess.run(command, check=True)
         print(f"✅ Success: {description}")
     except subprocess.CalledProcessError as e:
@@ -14,14 +15,14 @@ def safe_run(command, description):
 
 # Step 1: Install databricks-connect
 safe_run(
-    ["pip", "install", "databricks-connect==12.2.8"],
+    [sys.executable, "-m", "pip", "install", "databricks-connect==12.2.8"],
     "Installing databricks-connect"
 )
 
-# Step 2: Configure databricks-connect
+# Step 2: Configure databricks-connect using Python module (instead of CLI executable)
 safe_run(
     [
-        "databricks-connect", "configure", "--token",
+        sys.executable, "-m", "databricks_connect.cli", "configure", "--token",
         "--host", "https://<your-databricks-instance>",
         "--token-value", "<your-token>",
         "--cluster-id", "<your-cluster-id>",
@@ -31,5 +32,6 @@ safe_run(
     "Configuring databricks-connect"
 )
 
-# Proceed with your application logic here
-print("🎯 Continuing with the main application...")
+# Step 3: Continue with main application logic
+print("\n🎯 Setup complete (or skipped due to error). Continuing with the application...")
+# Your app logic starts here
