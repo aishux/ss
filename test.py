@@ -1,11 +1,26 @@
 import subprocess
 import sys
 
-def safe_run(command, description):
+def safe_run(command, description, input_text=None):
     try:
         print(f"\n🚀 Running: {description}")
-        subprocess.run(command, check=True)
-        print(f"✅ Success: {description}")
+        if input_text:
+            process = subprocess.Popen(
+                command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            stdout, stderr = process.communicate(input=input_text)
+            if process.returncode == 0:
+                print(f"✅ Success: {description}")
+            else:
+                print(f"⚠️ Failed: {description}")
+                print(stderr)
+        else:
+            subprocess.run(command, check=True)
+            print(f"✅ Success: {description}")
     except subprocess.CalledProcessError as e:
         print(f"⚠️ Failed: {description}")
         print(f"Error: {e}")
@@ -19,17 +34,34 @@ safe_run(
     "Installing databricks-connect"
 )
 
-# Step 2: Configure databricks-connect using Python module (instead of CLI executable)
+# Replace with your actual values or use environment variables for security
+
+# When running first time
+# inputs = """\
+# y
+# https://demo.cloud.databricks.com
+# helloworld
+# 112312
+# 123123
+# 15001
+# """
+
+# If already ran once:
+inputs = """\
+https://demo.cloud.databricks.com
+hellu
+112312
+123123
+15001
+"""
+
+print(sys.executable)
+
+# Step 2: Configure databricks-connect using Python module
 safe_run(
-    [
-        sys.executable, "-m", "databricks_connect.cli", "configure", "--token",
-        "--host", "https://<your-databricks-instance>",
-        "--token-value", "<your-token>",
-        "--cluster-id", "<your-cluster-id>",
-        "--org-id", "<your-org-id>",
-        "--port", "15001"
-    ],
-    "Configuring databricks-connect"
+    [sys.executable, "-m", "pyspark.databricks_connect", "configure"],
+    "Configuring databricks-connect",
+    input_text=inputs
 )
 
 # Step 3: Continue with main application logic
