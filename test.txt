@@ -1,1 +1,21 @@
-Since you've already got the walkthrough, I think you should be able to debug it by adding print statements function by function and commenting out the rest. That approach will give you better clarity as you go. Let me know if you get stuck anywhere!
+Subject: Recommendation: Using Azure AI Search for Knowledge Base in Commentary Agent
+
+Hi [Manager's Name],
+
+Hope you're doing well.
+
+As part of our requirement to build a Commentary Agent that generates narrative comments using a knowledge base, I initially explored Azure Custom QnA Maker (now part of Azure AI Studio). While it's convenient for quick FAQ-style setups, I believe our current approach using Azure AI Search is more suited to our use case—especially considering scalability, flexibility, and LLM integration.
+
+Here’s a quick comparison:
+
+Custom QnA Maker automatically handles chunking and Q&A extraction when PDFs or URLs are uploaded, which makes initial setup easy. However, it offers limited control over how content is segmented, indexed, or queried.
+
+With Azure AI Search, we manage the chunking process ourselves—which gives us greater flexibility in how we structure and retrieve information. This is particularly valuable when building a Retrieval-Augmented Generation (RAG) pipeline that delivers more contextual and accurate commentary.
+
+Given that we already have Azure AI Search set up, we can build on top of it—adding a vector store and connecting it to Azure OpenAI for dynamic commentary generation—without additional overhead.
+
+Happy to put together a quick POC or walkthrough if helpful.
+
+Best regards,
+Aishwarya
+
