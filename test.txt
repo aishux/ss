@@ -8,6 +8,13 @@ As part of our requirement to build a Commentary Agent that generates narrative 
 
 Here’s a quick comparison:
 
+| Feature    | Custom QnA Maker     | Azure AI Search                          |
+| ---------- | -------------------- | ---------------------------------------- |
+| PDF Upload | ✅ Simple drag & drop | ✅ Supported via blob/indexing            |
+| Chunking   | ✅ Automatic          | ❌ Manual (you design the chunking logic) |
+| Control    | ❌ Limited            | ✅ Full control                           |
+| Ideal for  | FAQs, policy docs    | Large-scale, smart search & RAG          |
+
 Custom QnA Maker automatically handles chunking and Q&A extraction when PDFs or URLs are uploaded, which makes initial setup easy. However, it offers limited control over how content is segmented, indexed, or queried.
 
 With Azure AI Search, we manage the chunking process ourselves—which gives us greater flexibility in how we structure and retrieve information. This is particularly valuable when building a Retrieval-Augmented Generation (RAG) pipeline that delivers more contextual and accurate commentary.
