@@ -4,9 +4,15 @@ Hi King and Mark,
 
 I wanted to share a recent discovery around Databricks AI Functions, specifically ai_query, which looks promising for our use case.
 
-I've been experimenting with ai_query, and it appears capable of effectively summarizing comments, potentially allowing us to replace the current Summation Agent. In addition, it could be leveraged for lightweight insight detection before we pull data into the Talk2FRS webapp service via JDBC.
+Initial tests show that ai_query is capable of summarizing comments effectively—essentially doing the job of our current Summation Agent. Additionally, it can assist with minor insight detection before the data is pulled into the Talk2FRS webapp via JDBC.
 
-I've discussed this briefly with Satya, and we both feel this direction is worth exploring further.
+I’ve discussed this with Satya, and we both think it’s worth deeper exploration.
+
+You can refer to the official documentation and a helpful demo notebook below:
+
+📘 Databricks AI Functions Documentation
+📓 Databricks Demo Notebook
+
 
 While we continue our analysis, I just wanted to check if you're aware of any restrictions or limitations around using Databricks AI Functions—especially in production environments or from a security/compliance standpoint.
 
