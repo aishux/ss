@@ -1,28 +1,16 @@
-Subject: Recommendation: Using Azure AI Search for Knowledge Base in Commentary Agent
+Subject: Exploring Databricks AI Functions for Comment Summarization & Minor Insight Detection
 
-Hi [Manager's Name],
+Hi King and Mark,
 
-Hope you're doing well.
+I wanted to share a recent discovery around Databricks AI Functions, specifically ai_query, which looks promising for our use case.
 
-As part of our requirement to build a Commentary Agent that generates narrative comments using a knowledge base, I initially explored Azure Custom QnA Maker (now part of Azure AI Studio). While it's convenient for quick FAQ-style setups, I believe our current approach using Azure AI Search is more suited to our use case—especially considering scalability, flexibility, and LLM integration.
+I've been experimenting with ai_query, and it appears capable of effectively summarizing comments, potentially allowing us to replace the current Summation Agent. In addition, it could be leveraged for lightweight insight detection before we pull data into the Talk2FRS webapp service via JDBC.
 
-Here’s a quick comparison:
+I've discussed this briefly with Satya, and we both feel this direction is worth exploring further.
 
-| Feature    | Custom QnA Maker     | Azure AI Search                          |
-| ---------- | -------------------- | ---------------------------------------- |
-| PDF Upload | ✅ Simple drag & drop | ✅ Supported via blob/indexing            |
-| Chunking   | ✅ Automatic          | ❌ Manual (you design the chunking logic) |
-| Control    | ❌ Limited            | ✅ Full control                           |
-| Ideal for  | FAQs, policy docs    | Large-scale, smart search & RAG          |
+While we continue our analysis, I just wanted to check if you're aware of any restrictions or limitations around using Databricks AI Functions—especially in production environments or from a security/compliance standpoint.
 
-Custom QnA Maker automatically handles chunking and Q&A extraction when PDFs or URLs are uploaded, which makes initial setup easy. However, it offers limited control over how content is segmented, indexed, or queried.
-
-With Azure AI Search, we manage the chunking process ourselves—which gives us greater flexibility in how we structure and retrieve information. This is particularly valuable when building a Retrieval-Augmented Generation (RAG) pipeline that delivers more contextual and accurate commentary.
-
-Given that we already have Azure AI Search set up, we can build on top of it—adding a vector store and connecting it to Azure OpenAI for dynamic commentary generation—without additional overhead.
-
-Happy to put together a quick POC or walkthrough if helpful.
+Looking forward to your thoughts.
 
 Best regards,
 Aishwarya
-
