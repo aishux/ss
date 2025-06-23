@@ -1,3 +1,5 @@
+pip install azure-search-documents
+
 from azure.search.documents.indexes import SearchIndexClient
 from azure.core.credentials import AzureKeyCredential
 
