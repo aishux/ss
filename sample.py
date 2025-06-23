@@ -1,22 +1,20 @@
-from dotenv import load_dotenv
-import os
+from azure.search.documents.indexes import SearchIndexClient
+from azure.core.credentials import AzureKeyCredential
 
-# Load the environment variables from local.env
-load_dotenv("local.env")
+# Replace these with your actual values
+search_service_name = "your-search-service-name"
+api_key = "your-admin-key"  # Must be admin key to list indexes
 
-# Build the multiline input string
-inputs = "\n".join([
-    os.getenv("confirm", "y"),
-    os.getenv("databricks_hostname", ""),
-    os.getenv("token", ""),
-    os.getenv("cluster_id", ""),
-    os.getenv("org_id", ""),
-    os.getenv("port", ""),
-]) + "\n"
+# Construct endpoint
+endpoint = f"https://{search_service_name}.search.windows.net"
 
-# Now use `inputs` in your subprocess call
-safe_run(
-    [sys.executable, "-m", "pyspark.databricks_connect", "configure"],
-    "Configuring databricks-connect",
-    input_text=inputs
-)
+# Create index client
+index_client = SearchIndexClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
+
+# List all indexes
+indexes = index_client.list_indexes()
+
+# Print index names
+print("Available Indexes:")
+for index in indexes:
+    print(f"- {index.name}")
