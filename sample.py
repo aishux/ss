@@ -1,34 +1,47 @@
-from langchain.chat_models import AzureChatOpenAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-import os
+from langchain_openai import AzureChatOpenAI
 
-# Set env vars (or use config file)
-os.environ["AZURE_OPENAI_API_KEY"] = "<your-key>"
-os.environ["AZURE_OPENAI_ENDPOINT"] = "<your-endpoint>"
-os.environ["AZURE_OPENAI_API_VERSION"] = "2023-05-15"
-
+# Initialize Azure OpenAI model
 llm = AzureChatOpenAI(
-    deployment_name="gpt-4",  # your Azure deployment name
+    api_key="<your-azure-api-key>",
+    azure_endpoint="<your-azure-endpoint>",
+    api_version="2023-05-15",
+    deployment_name="gpt-4",
     temperature=0.3
 )
 
-prompt = PromptTemplate.from_template("""
-You are an assistant that rewrites business rules into clean, human-readable English.
+# Function to rewrite a list of rules using LLM
+def rewrite_rules_with_llm(rule_list):
+    rules_text = "\n".join(f"- {rule}" for rule in rule_list)
 
-Here are the rules:
-{rules}
+    user_prompt = f"""
+You are a helpful assistant that rewrites business rules into clear, human-readable English.
 
-Rewrite each rule clearly in bullet points.
-""")
+Rewrite the following rules into clear English sentences:
+{rules_text}
+"""
 
-chain = LLMChain(llm=llm, prompt=prompt)
+    response = llm.invoke([
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": user_prompt}
+    ])
 
-# Example: row-wise in DataFrame
-def rewrite_rules_with_langchain(rule_list):
-    rules_text = "\n".join(f"- {r}" for r in rule_list)
-    response = chain.run(rules=rules_text)
-    # post-process to extract clean sentences
-    return [line.strip("- ").strip() for line in response.split("\n") if line.strip()]
+    # Extract and clean the content
+    output_lines = response.content.split("\n")
+    return [line.strip("-• ").strip() for line in output_lines if line.strip()]
 
-df['rephrased_rules'] = df['split_rules'].apply(rewrite_rules_with_langchain)
+# Example usage with a DataFrame
+import pandas as pd
+
+# Assume synonyms already replaced
+df = pd.DataFrame({
+    "split_rules": [
+        ["Current year for this year will be high", "GWM performance has grown"],
+        ["Resources are insufficient this quarter"]
+    ]
+})
+
+# Apply the LLM function
+df['rephrased_rules'] = df['split_rules'].apply(rewrite_rules_with_llm)
+
+# View result
+print(df[['split_rules', 'rephrased_rules']])
