@@ -1,49 +1,44 @@
-from azure.search.documents.indexes import SearchIndexClient
-from azure.core.credentials import AzureKeyCredential
+import json
+import pandas as pd
+import re
 
-def get_equivalent_synonyms(word, synonym_map_text):
-    """
-    Given a word and synonym map content, return its equivalent synonyms.
-    Only handles equivalent groups (comma-separated).
-    """
-    word = word.lower().strip()
-    synonym_lines = synonym_map_text.strip().splitlines()
+# Load synonym list from JSON file
+with open('synonyms.json', 'r') as f:
+    synonym_lines = json.load(f)
 
-    for line in synonym_lines:
-        line = line.strip()
+# Build synonym map (all lowercase for case-insensitive matching)
+synonym_map = {}
+for line in synonym_lines:
+    parts = [p.strip() for p in line.split(',')]
+    full_form = parts[1].capitalize() if len(parts) > 1 else parts[0]
+    for synonym in parts:
+        synonym_map[synonym.strip().lower()] = full_form
 
-        # Skip empty or comment lines
-        if not line or line.startswith("#"):
-            continue
+# Compile a regex pattern that matches any synonym
+synonym_pattern = re.compile(r'\b(' + '|'.join(re.escape(k) for k in sorted(synonym_map, key=len, reverse=True)) + r')\b', re.IGNORECASE)
 
-        # Skip non-equivalent types (=> or |)
-        if "=>" in line or "|" in line:
-            continue
+# Function to replace synonyms in a single string
+def replace_synonyms_in_text(text):
+    return synonym_pattern.sub(lambda m: synonym_map.get(m.group(0).lower(), m.group(0)), text)
 
-        # Process comma-separated equivalent synonyms
-        terms = [term.strip() for term in line.split(",")]
-        terms_lower = [t.lower() for t in terms]
+# Function to process the list of strings (split_rules)
+def replace_synonyms_in_list(rule_list):
+    return [replace_synonyms_in_text(rule) for rule in rule_list]
 
-        if word in terms_lower:
-            return [terms[i] for i in range(len(terms)) if terms_lower[i] != word]
+# Sample DataFrame
+data = {
+    "id": [1, 2],
+    "name": ["example1", "example2"],
+    "type": ["A", "B"],
+    "split_rules": [
+        ["1: CY for this year will be high"],
+        ["GWM performance has grown"]
+    ]
+}
+df = pd.DataFrame(data)
 
-    return []
+# Apply the replacement function to the split_rules column
+df['split_rules'] = df['split_rules'].apply(replace_synonyms_in_list)
 
-# 🔧 Replace with your actual values
-search_service_name = "your-search-service-name"
-api_key = "your-admin-key"
-synonym_map_name = "your-synonym-map-name"
-endpoint = f"https://{search_service_name}.search.windows.net"
-
-# 🧠 Fetch synonym map content from Azure
-index_client = SearchIndexClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
-synonym_map = index_client.get_synonym_map(synonym_map_name)
-
-# 🔍 Example usage
-input_word = "MoM"
-synonyms = get_equivalent_synonyms(input_word, synonym_map.synonyms)
-
-if synonyms:
-    print(f"Synonyms for '{input_word}': {synonyms}")
-else:
-    print(f"No synonyms found for '{input_word}'.")
+# Show result
+print(df)
