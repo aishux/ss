@@ -14,7 +14,7 @@ def rewrite_rules_with_llm(rule_list):
     rules_text = "\n".join(f"- {rule}" for rule in rule_list)
 
     user_prompt = f"""
-You are a helpful assistant that rewrites business rules into clear, human-readable English.
+You are a Rephrasing assistant that rewrites business rules into clear, human-readable English.
 
 Rewrite the following rules into clear English sentences:
 {rules_text}
@@ -45,3 +45,8 @@ df['rephrased_rules'] = df['split_rules'].apply(rewrite_rules_with_llm)
 
 # View result
 print(df[['split_rules', 'rephrased_rules']])
+
+
+Always maintain the abbreviations case 
+In each point, split it into actionable sub points
+Consider each point as a separate entity and wherever a previous context is used, add the detailed steps again in that point. 
