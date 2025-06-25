@@ -92,6 +92,10 @@ df = pd.DataFrame({
 # Apply the LLM function
 df['rephrased_rules'] = df['split_rules'].apply(rewrite_rules_with_llm)
 
+# Now convert to readable format
+df['rephrased_rules_str'] = df['rephrased_rules'].apply(lambda arr: "\n".join(arr))
+
+
 # View result
 print(df[['split_rules', 'rephrased_rules']])
 
