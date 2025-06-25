@@ -46,7 +46,7 @@ df['rephrased_rules'] = df['split_rules'].apply(rewrite_rules_with_llm)
 # View result
 print(df[['split_rules', 'rephrased_rules']])
 
-
+put example
 Always maintain the abbreviations case 
 In each point, split it into actionable sub points
 Consider each point as a separate entity and wherever a previous context is used, add the detailed steps again in that point. 
