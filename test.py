@@ -1,75 +1,80 @@
-from langchain_openai import AzureChatOpenAI
-import pandas as pd
-import json
+user_prompt = f"""
+You are a precise and structured assistant that rewrites complex business rules into clear, structured, and atomic instructions.
 
-# Load synonyms from JSON file
-with open('synonyms.json', 'r', encoding='utf-8') as f:
-    synonym_lines = json.load(f)
+---
 
-# Convert list of synonym lines into a structured dictionary
-def build_synonym_dict(synonym_lines):
-    synonym_dict = {}
-    for line in synonym_lines:
-        if "=>" in line:
-            parts = [p.strip() for p in line.split("=>")]
-            if len(parts) == 2:
-                synonym_dict[parts[0]] = parts[1]
-        elif "," in line:
-            parts = [p.strip() for p in line.split(",")]
-            full_form = parts[1] if len(parts) > 1 else parts[0]
-            for synonym in parts:
-                synonym_dict[synonym] = full_form
-    return synonym_dict
+### 🔁 Task Overview:
 
-synonym_dict = build_synonym_dict(synonym_lines)
+You will be given a list of business rules. Your goal is to rewrite them into clear English and break them down into **small, independent, self-contained subpoints**.
 
-# Initialize LLM
-llm = AzureChatOpenAI(
-    api_key="<your-azure-api-key>",
-    azure_endpoint="<your-azure-endpoint>",
-    api_version="2023-05-15",
-    deployment_name="gpt-4",
-    temperature=0.3
-)
+Each subpoint should be:
 
-# Function to rewrite a list of rules using LLM
-def rewrite_rules_with_llm(rule_list):
-    rules_text = "\n".join(f"- {rule}" for rule in rule_list)
-    synonyms_json = json.dumps(synonym_dict, indent=2)
+- Easy for an LLM or analyst to execute independently
+- Explicit in scope, especially when it comes to **time period comparisons**, **metrics**, or **business units**
+- Formatted using hierarchical numbering (e.g., 1.1, 1.2, or YTD-3.4)
 
-    user_prompt = f"""You are a structured assistant that rewrites business rules using a synonym mapping.
+---
 
-Your task is to:
-1. First replace terms in the rules using the following synonym dictionary:
-{synonyms_json}
+### ✅ Rules to Follow:
 
-2. Then rewrite the rules into clear, atomic English instructions.
-   - Break down compound sentences.
-   - Make all time comparisons explicit based on the first line.
-   - Use hierarchical sub-point numbering like 1.1, 1.2, etc.
-   - Keep abbreviations like NPBT, DCM, GWM exactly as-is (case-sensitive).
-   - Avoid repeating phrases like "the same" — rewrite those explicitly.
+1. **Preserve original abbreviations** and casing (e.g., NPBT, DCM, F6100).
 
-Here are the rules to rewrite:
+2. **Split compound instructions** into separate subpoints, each performing one action.
+
+3. If a rule contains **ambiguous references** like “Do the same”, **replace** them with clear and explicit instructions derived from earlier steps.
+
+4. **Carry forward comparison periods intelligently**:  
+   - If the first rule defines a comparison period (e.g., “current quarter vs prior quarter”), then this period applies to all subsequent subpoints **unless explicitly overridden**.
+   - Make the comparison period **explicit in each subpoint** where it's relevant (e.g., “compare Revenues for the current quarter vs prior quarter”).
+   - Do **not hardcode** any specific period — always infer it from the first instruction in the list.
+
+5. Rewrite everything in **clear business English**.
+
+6. If a rule says to "compare X for period A vs period B" or "show variance in X and Y for period A vs B", then:
+   - Break it down into 4 steps:  
+     (a) state X for period A,  
+     (b) state X for period B,  
+     (c) state Y for period A,  
+     (d) state Y for period B  
+   - Then include comparisons:  
+     (e) compare X across A and B,  
+     (f) compare Y across A and B.  
+   This ensures both value extraction and comparative analysis are independently actionable.
+
+---
+
+### 🔍 Examples:
+
+#### Input:
+> "1. Prepare a summary of Financial Performance for current quarter vs prior quarter of the same period."
+
+#### Subpoints:
+> 1.1 Prepare a summary of Financial Performance comparing the current quarter to the prior quarter of the same period.
+
+---
+
+#### Input:
+> "2. Show the variance in Revenues and Expenses."
+
+#### Subpoints:
+> 2.1 Show the variance in Revenues over the comparison period defined in the first instruction.  
+> 2.2 Show the variance in Expenses over the same comparison period.
+
+---
+
+#### Input:
+> "3. Show the variance in Revenues and Expenses for prior quarter vs current quarter."
+
+#### Subpoints:
+> 3.1 Show the variance in Revenues for the prior quarter.  
+> 3.2 Show the variance in Revenues for the current quarter.  
+> 3.3 Show the variance in Expenses for the prior quarter.  
+> 3.4 Show the variance in Expenses for the current quarter.  
+> 3.5 Compare the Revenues for the prior quarter with the Revenues for the current quarter.  
+> 3.6 Compare the Expenses for the prior quarter with the Expenses for the current quarter.
+
+---
+
+Now rewrite and decompose the following rules:
 {rules_text}
 """
-
-    response = llm.invoke([
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": user_prompt}
-    ])
-
-    output_lines = response.content.split("\n")
-    return [line.strip("-• ").strip() for line in output_lines if line.strip()]
-
-# Example usage
-df = pd.DataFrame({
-    "split_rules": [
-        ["CY for this year will be high", "Income is growing"],
-        ["GWM performance has grown", "Resources are insufficient this quarter"]
-    ]
-})
-
-# Apply
-df['rephrased_rules'] = df['split_rules'].apply(rewrite_rules_with_llm)
-print(df[['split_rules', 'rephrased_rules']])
