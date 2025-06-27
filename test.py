@@ -1,1 +1,54 @@
-user_prompt = f"You are a precise and structured assistant that rewrites complex business rules into clear, structured, and atomic instructions.\n---\n### 🔁 Task Overview:\nYou will be given a list of business rules. Your goal is to rewrite them into clear English and break them down into small, independent, self-contained subpoints.\nEach subpoint should be:\n- Easy for an LLM or analyst to execute independently\n- Explicit in scope, especially when it comes to time period comparisons, metrics, or business units\n- Formatted using hierarchical numbering (e.g., 1.1, 1.2, or YTD-3.4)\n---\n### ✅ Rules to Follow:\n1. Preserve original abbreviations and casing (e.g., NPBT, DCM, F6100).\n2. Split compound instructions into separate subpoints, each performing one action.\n3. If a rule contains ambiguous references like “Do the same”, replace them with clear and explicit instructions derived from earlier steps.\n4. Carry forward comparison periods intelligently:\n   - If the first rule defines a comparison period (e.g., “current quarter vs prior quarter”), then this period applies to all subsequent subpoints unless explicitly overridden.\n   - Make the comparison period explicit in each subpoint where it's relevant (e.g., “compare Revenues for the current quarter vs prior quarter”).\n   - Do not hardcode any specific period — always infer it from the first instruction in the list.\n5. Rewrite everything in clear business English.\n---\n### 🔍 Examples:\n#### Input:\n\"1. Prepare a summary of Financial Performance for current quarter vs prior quarter of the same period.\"\n#### Subpoints:\n1.1 Prepare a summary of Financial Performance comparing the current quarter to the prior quarter of the same period.\n---\n#### Input:\n\"2. Show the variance in Revenues and Expenses.\"\n#### Subpoints:\n2.1 Show the variance in Revenues over the comparison period defined in the first instruction.\n2.2 Show the variance in Expenses over the same comparison period.\n---\n#### Input:\n\"7. Do the same for YTD current year vs YTD prior year.\"\n#### Subpoints:\nYTD-1.1 Prepare a summary of Financial Performance comparing YTD current year to YTD prior year.\nYTD-1.2 Highlight variance in Revenues during this YTD period.\n… and so on.\n---\nNow rewrite and decompose the following rules:\n{rules_text}"
+import json
+import pandas as pd
+import re
+
+# Load synonym list from JSON file
+with open('synonyms.json', 'r', encoding='utf-8') as f:
+    synonym_lines = json.load(f)
+
+# Build synonym map (case-insensitive)
+synonym_map = {}
+for line in synonym_lines:
+    # Handle "=>" format
+    if "=>" in line:
+        parts = [p.strip() for p in line.split("=>")]
+        if len(parts) == 2:
+            synonym_map[parts[0].lower()] = parts[1]
+    # Handle comma-separated format
+    elif "," in line:
+        parts = [p.strip() for p in line.split(",")]
+        full_form = parts[1].capitalize() if len(parts) > 1 else parts[0]
+        for synonym in parts:
+            synonym_map[synonym.lower()] = full_form
+
+# Compile a regex pattern for all synonyms (longer first to avoid partial matches)
+synonym_pattern = re.compile(
+    r'\b(' + '|'.join(re.escape(k) for k in sorted(synonym_map, key=len, reverse=True)) + r')\b',
+    re.IGNORECASE
+)
+
+# Replace synonyms in a single string
+def replace_synonyms_in_text(text):
+    return synonym_pattern.sub(lambda m: synonym_map.get(m.group(0).lower(), m.group(0)), text)
+
+# Replace synonyms in list of strings
+def replace_synonyms_in_list(rule_list):
+    return [replace_synonyms_in_text(rule) for rule in rule_list]
+
+# Sample DataFrame
+data = {
+    "id": [1, 2],
+    "name": ["example1", "example2"],
+    "type": ["A", "B"],
+    "split_rules": [
+        ["1: CY for this year will be high", "Income is growing"],
+        ["GWM performance has grown", "Mom variance is seen"]
+    ]
+}
+df = pd.DataFrame(data)
+
+# Apply synonym replacement
+df['split_rules'] = df['split_rules'].apply(replace_synonyms_in_list)
+
+# Print result
+print(df[['id', 'split_rules']])
