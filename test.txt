@@ -1,1 +1,10 @@
+Hi Satya,
 
+The MD&A rules decomposition and rephrasing is now complete. I’ve attached an Excel file containing the input rules, the rephrased output, and the prompt used for the process.
+
+The code has been checked into the commentary_framework branch.
+
+Please feel free to review it whenever you get the time. I’ve also scheduled a call on Monday to walk you through the details.
+
+Best regards,
+Aishwarya
