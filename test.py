@@ -68,7 +68,7 @@ Each subpoint should be:
 #### Subpoints:
 > YTD-1.1 Prepare a summary of Financial Performance comparing YTD current year to YTD prior year.  
 > YTD-1.2 Highlight variance in Revenues during this YTD period.  
-> … and so on.
+> … and so on for all the given points.
 
 ---
 
