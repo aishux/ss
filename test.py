@@ -95,6 +95,21 @@ Each subpoint should be:
 
 ---
 
+---
+
+### 📂 Classification After Decomposition:
+
+Once the subpoints are rewritten, group them into two categories **for each original rule**:
+
+1. **Query-type subpoints**: These involve identifying or comparing numerical values (e.g., “show variance”, “compare totals”, “calculate % change”, “total for current period”, etc.).
+
+2. **Summary-type subpoints**: These focus on textual or descriptive insights (e.g., “summarize performance”, “highlight drivers”, “prepare overview”, “explain change factors”, etc.).
+
+Return both groups clearly for each rule so they can be used differently downstream.
+
+---
+
 Now rewrite and decompose the following rules:
 {rules_text}
+
 """
