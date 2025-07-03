@@ -3,61 +3,87 @@ import os
 
 applicationPath = os.path.abspath(os.path.join(os.path.dirname(sys.argvl0)), '.'.'..'))
 # parent_dir = os.path.abspath(' .. ')
-if applicationPath not in sys.path: sys.path.append(applicationPath)
-import json import asyncid
-from typing import List import vvid
+if applicationPath not in sys.path: 
+ sys.path.append(applicationPath)
+import json 
+import asyncio
+from typing import List 
+import vvid
 from typing_extensions import TypedDict
-from langgraph. graph import StateGraph, START, END import os
+from langgraph.graph import StateGraph, START, END 
+import os
 from src.multiagent_commentary.states import GraphState, GraphStateParallel 
-from src.multiagent_commentary.tool_instances import (chat_history,
-graph_history, ibNodeinstance,
-gwmNodeInstance,
-rephraseNodeInstance, decomposeNodeInstance, summerizationNodeInstance, rulesAgentInstance)
+from src.multiagent_commentary.tool_instances import (chat_history, graph_history, ibNodeinstance, gwmNodeInstance, rephraseNodeInstance, decomposeNodeInstance, summerizationNodeInstance, rulesAgentInstance)
 from langraph.checkpoint.memory import MemorySaver
 import logging 
 
 logger = logging.getLogger("talk2frs.FrsGraphAgent")
 
-Eclass FrsGraphAgent:
-8 t699763
-def -_init__(self):
+class FrsGraphAgent:
+  def __init__(self):
+    self.memory = MemorySaver)
+    self.graph = self.graph_builder()
+    self.graph_complied = self.graph.compile(checkpointer=self.memory)
 
-self memory = MemorySaver)
-self. graph = self.graph_builder(
-self.graph_complied = self.graph.compile(checkpointer=self.memory)
+  async def Queryphrase_Node(self, state: GraphStateParalLel) -> GraphStateParallel:
+    logger.info("\n\n==================== Running Queryphrase Agent ====================") 
+    try:
+       result, user_preference, division_linked_ques = await rephraseNodeInstance(state["user_query"], state["user_id"], graph_history)
+       # print(division_linked_ques)
+       return {
+       "user_query": result,
+       "rephrased_query": result, # TBD - Link rephrased query properly
+       "user_based_reference": user_prefenence,
+       "independent_ques": division_linked_ques,
+       }
+    except Exception as err:
+      err_msg = f"""We apologize for the inconvenience. It seems our application has encountered an error"""
+      graph_history.add_entry(
+      user_query=state["user_query"],
+      ai_response = err_msg,
+      sql_query=None, 
+      sql_data=None,
+      sql_data_string=None, 
+      sql_citation=None,
+      routing_type=None,
+     )
+  
+    return {
+     "user_query": state["user_query"],
+     "ai_response": err_msg,
+     "next": END
+    }
 
-# Create nodes
-1 usage = t699763
-async def lureyrephrase lode(self, state: GraphStateParalLel) - GraphStateParallel:
-2ogger.info("\n\n==================== Running Quneynephnase Agent == try:
-result, user_preference, division_linked_ques = await rephraseNodeInstance(state["user_query"],
-state["user_id"], graph_history)
-# print(division_linked_ques)
-return i
-"user_query": result,
-"rephrased_query": result,
-# TBD - Link rephrased query properly
-"user_based_reference": user-prefenence,
-"independent_ques": division_Linked_ques,
-except Exception as enc:
-err_msg = f"""We apologize for the inconvenience. It seems our application has encountered an error --- Infs
-...
-graph_history.add_entryC
-user_query=state["user_query"],
-ai_responseserr_msg,
-sql_query=None, sql_data=None,
-sql_data_string=None, sql_citation=None,
-sql_citation=None,
-routing_type=None,
-)
+  async def Decompose_Node(self, state: GraphStateParalLel) -> GraphStateParallel:
 
-return {
-"user_query": state["user-query"]
-a1_response*: err_msg.
-*next*: END
-}
+  async def Router_Node(self, state: GraphStateParalLel) -> GraphStateParallel:
+
+  async def ibNode(self, state: GraphStateParalLel) -> GraphStateParallel:
+
+  async def gwmNode(self, state: GraphStateParalLel) -> GraphStateParallel:
+
+  async def summerizationNode(self, state: GraphStateParalLel) -> GraphStateParallel:
+
+  async def business_division_parrallel_router(self, state: GraphStateParalLel) -> GraphStateParallel:
+
+  
+
+  
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 async def Decompose Mode(self, state: GraphStateParallel) -> GraphStateParallel:
 Logger.info("\n\n========
 =ssess Running Decompose Agent ====sssssessestessss)
@@ -97,4 +123,5 @@ return {
 "ai_response": err_msg,
 "next": END
 }
+'''
   
