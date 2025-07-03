@@ -21,34 +21,11 @@ logger = logging.getLogger("talk2frs.FrsGraphAgent")
 Eclass FrsGraphAgent:
 8 t699763
 def -_init__(self):
-73
+
 self memory = MemorySaver)
 self. graph = self.graph_builder(
 self.graph_complied = self.graph.compile(checkpointer=self.memory)
-10
-77
-38
-39
-41
-22
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
+
 # Create nodes
 1 usage = t699763
 async def lureyrephrase lode(self, state: GraphStateParalLel) - GraphStateParallel:
@@ -79,3 +56,45 @@ return {
 a1_response*: err_msg.
 *next*: END
 }
+
+
+async def Decompose Mode(self, state: GraphStateParallel) -> GraphStateParallel:
+Logger.info("\n\n========
+=ssess Running Decompose Agent ====sssssessestessss)
+try:
+decomposed_question = await decomposeNodeInstance(state[*rephrased_query*],
+statel user_based_reference"]["business_division_access*])
+decomposed_question_formatted = json.dumps (decomposed_question, indent=4)
+logger.info(f" Rephrased query was decomposed as below ...- \n {decomposed_question_formatted}*) if decomposed_question == (}:
+return {**state}
+any (keyDiv. lower()
+err_msg = "•
+== "clarification_needed". lower() for keyDiv in decomposed_question):
+keyDiv in decomposed_ question:
+if keyDiv. lower() = clarification_needed".Lower():
+err_msg = decomposed_ question [keyDiv]
+raise Exception(err_msg)
+elif all(len(val) == 0
+raise
+Exception(
+for keyDiv, val in decomposed_question.items()):
+"We were not
+able to break down the question properly to trigger subsequent agents which could be due to incorrect measure name provided in the user question.")
+eLse:
+return {
+"independent_ques": {div: ques for div, ques in decomposed_question.items() if
+(div not in ["dependent", "clarification_needed"])},
+"dependent_ques": {div: ques for div, ques in decomposed_question.items() if (div == 'dependent')}
+except Exception as err:
+err_msg = f***We apologize for the inconvenience. It seems
+graph_history.add_entryC
+user _query=statel*user_query"], ai_response=err_msg,
+sql_query=None, sql_data=None,
+sql_data_string=None, sql_citation=None, routing_type=None,
+I
+return {
+"user-query": statel "user _query"],
+"ai_response": err_msg,
+"next": END
+}
+  
