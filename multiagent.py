@@ -68,80 +68,77 @@ class FrsGraphAgent:
 
   
 def graph_builder(self) -> GraphStateParallel:
-## Parallel execution
-graph_builder = StateGraph(GraphStateParallel)
-graph_builder.add_node("Querynephnase", self. Qureyrephrase_Node)
-graph_builder.add_node("Decompose", self.Decompose_Node) graph_builder.add_node("Router_Node", self.Router _Node)
-graph_builder.add_node("ibFrsBot"
-, self. ibNode)
-graph_builder.add_node("gwmFrsBot", self. gwmNode)
-graph_builder. add_node ("Summenization", self. summerization_Node)
-# Error handling
-graph_builder. add_edge(START, end key: "Querynephrase")
-# graph_builder. add_edge("Querynephnase", "Decompose")
-graph_builder.add_conditional_edges( source "Querynephnase". Lambda state: state.get("next", "Decompose*)) graph_builder.add_conditional_edges( source: "Decompose", Lambda state: state.get("next", "Router _Node"))
-graph_builder.add_conditional_edges( source: "Router_Node"
-self.business_division_parallel_router,
-path_map: {
-"Investment Banking": "ibFrsBot"
-"Global Wealth Management": "gwmFrsBot",
-"Summerization": "Summenization".
-"END": END
-)
-graph_builder.add_edge( start_key: "ibFrsBot'
-end_key;
-"Summenization")
-graph_builder, add_edge( start_key: 'gwmFrsBot'
-•end_ key:
-"Summerization")
-graph_builder.add_edge ( start.key:
-"Summenization"
-• END)
-return graph_builder
+   ## Parallel execution
+   graph_builder = StateGraph(GraphStateParallel)
+   graph_builder.add_node("Queryrephrase", self. Qureyrephrase_Node)
+   graph_builder.add_node("Decompose", self.Decompose_Node) 
+   graph_builder.add_node("Router_Node", self.Router_Node)
+   graph_builder.add_node("ibFrsBot", self.ibNode)
+   graph_builder.add_node("gwmFrsBot", self.gwmNode)
+   graph_builder.add_node ("Summerization", self. summerization_Node)
+   # Error handling
+   graph_builder.add_edge(START, "Queryrephrase")
+   # graph_builder. add_edge("Querynephnase", "Decompose")
+   graph_builder.add_conditional_edges("Queryrephrase", lambda state: state.get("next", "Decompose")) 
+   graph_builder.add_conditional_edges("Decompose", lambda state: state.get("next", "Router_Node"))
+   graph_builder.add_conditional_edges( source: "Router_Node",
+                                        self.business_division_parallel_router,
+                                        {
+                                        "Investment Banking": "ibFrsBot"
+                                        "Global Wealth Management": "gwmFrsBot",
+                                        "Summerization": "Summenization".
+                                        "END": END
+                                        } 
+                                        )
+   graph_builder.add_edge("ibFrsBot", "Summenization")
+   graph_builder.add_edge("gwmFrsBot", "Summenization")
+   graph_builder.add_edge("Summenization", END)
+
+   return graph_builder
 
 async def run(self, user_question, user_id=None):
-#
-computed_thread_id_tmp = "'-join(str(ord(st)) for st in user_id)
-computed_thread_id_tmp = f"{user_id}::{uuid.Uid4O}*
-print("computed temp thread_id", computed_thread_id_tmp)
-input_data = t
-"user_query": user_question,
-"user_id": user_id
-}
-initial_state = GraphStateParallel(user_query-user-question, user_id=user_id)
-config = 1
-"configurable" : {
-"thread_id": computed_thread_id_tmp
-}
-result = await self.graph_complied.ainvoke(initial_state, config)
-# print("Final result", result)
-return result
+   computed_thread_id_tmp = f"{user_id}::{uuid.uuid4()}"
+   print("computed temp thread_id", computed_thread_id_tmp)
+   input_data = {
+   "user_query": user_question,
+   "user_id": user_id
+   }
+   initial_state = GraphStateParallel(user_query=user_question, user_id=user_id)
+   config = {
+    "configurable" : {
+    "thread_id": computed_thread_id_tmp
+    }
+   } 
+   result = await self.graph_complied.ainvoke(initial_state, config)
+   # print("Final result", result)
+   return result
 
-Fif -_name__ == "__main__":
-agent_obj = FrsGraphAgent)
-while True:
-try:
-user_input = input("\n\nUser: ")
-user_email = input("\nEmail: *)
-if user_input. lower() in ["quit", "exit", "q"]:
-print ("Goodbye!")
-break
-# graphResult = asyncio.run(agent_obj.run(user_input, "miguel.mendes-pena@ubs.com*))
-graphResult = asyncio.run(agent_obj.run(user_input, user_email))
-# print(" --- History ----", graph_history -messages[-1])
-print("User Query:")
-print(graphResult["user_query"] if graphResult.get("user_query") else **)
-print("\n")
-print("SQL Query:")
-print(graphResult["sql_query"] if graphResult.get("sql_query") else **)
-print("\n")
-print("AI response:")
-print(graphResult["ai_response"] if graphResult,get("ai_response") else "*)
 
-except Exception as err:
-print("Error occurred----import traceback
-print(traceback. print_exc()
-break
+
+if __name__ == "__main__":
+  agent_obj = FrsGraphAgent()
+  while True:
+  try:
+    user_input = input("\n\nUser: ")
+    user_email = input("\nEmail: *)
+    if user_input.lower() in ["quit", "exit", "q"]:
+       print ("Goodbye!")
+       break
+    # graphResult = asyncio.run(agent_obj.run(user_input, "miguel.mendes-pena@ubs.com*))
+    graphResult = asyncio.run(agent_obj.run(user_input, user_email))
+    # print(" --- History ----", graph_history -messages[-1])
+    print("User Query:")
+    print(graphResult["user_query"] if graphResult.get("user_query") else **)
+    print("\n")
+    print("SQL Query:")
+    print(graphResult["sql_query"] if graphResult.get("sql_query") else **)
+    print("\n")
+    print("AI response:")
+    print(graphResult["ai_response"] if graphResult,get("ai_response") else "*)
+  
+  except Exception as err:
+    print("Error occurred")
+    break
   
 
 
