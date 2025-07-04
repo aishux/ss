@@ -1,16 +1,30 @@
-Subject: Farewell Contribution for Sanjana 😊
+Subject: Commentary Agent – Preview of My Work
 
-Hi all,
+Hi Mark,
 
-Hope you're doing well!
+I had prepared for the Show and Tell session today, but unfortunately, it got cancelled due to the test fire drill in the London office. Since I had completed my part, I wanted to share a quick overview of the work I was planning to present.
 
-We had a lovely time celebrating Sanjana’s farewell, and a big thanks to Mcdon for treating us to lunch at Pop Tates — that was really generous of him!
+Please find attached a PDF preview of the Commentary Agent.
 
-Just a quick note — I went ahead and picked up the gifts, and the total came to ₹3343. Since Mcdon’s covering the lunch, it’s just the four of us splitting the gift cost. That comes to ₹835.75 per person.
+On Page 1, you’ll see the Rules Interpretation output. These are the initial inputs provided by the user (Querish), which the Rules Agent processes by rephrasing, decomposing, and grouping into:
 
-Whenever convenient, you can GPay me on [your number]. No rush — just thought I’d drop a note. :)
+Query-type rules (which require data extraction)
 
-Thanks again for making the farewell special!
+Summary-type rules (which involve descriptive insights)
 
-Best,
+The Query-type rules are passed to the IB Data Agent, which generates corresponding SQL queries. You can find the decomposed questions and their generated queries on Pages 2 and 3.
+
+The results from the IB Data Agent are then passed to the Summarisation and Commentary Agent, which produces a basic commentary.
+
+The commentary output is still in a preliminary stage — we’re currently not following a structured template, and improvements are needed in terms of:
+
+Commentary quality
+
+Dynamic orchestration
+
+Overall performance tuning
+
+I’d be happy to walk you through it on Monday. Also, many thanks to Satya for his help with the query and results part.
+
+Thanks,
 Aishwarya
