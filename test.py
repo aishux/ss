@@ -1,9 +1,12 @@
-# Prefix each full rule block with "### Rule"
-df['rephrased_rules'] = df['rephrased_rules'].apply(lambda rules: [f"### Rule\n{rule}" for rule in rules])
+import json
 
-# Explode the rules into separate rows
-df_exploded = df.explode('rephrased_rules').reset_index(drop=True)
+# Assuming `result` is your dictionary
+print("Final Result ------------------\n")
 
-# Optional: To view the full content in console
-pd.set_option('display.max_colwidth', None)
-print(df_exploded[['split_rules', 'rephrased_rules']])
+for rule, items in result.items():
+    print(f"{rule}:")
+    for idx, item in enumerate(items, 1):
+        ques = item.get("ques", "")
+        sql_query = item.get("sqlQuery", "")
+        print(f"  [{idx}] Ques     : {ques}")
+        print(f"      SQLQuery: {sql_query}\n")
