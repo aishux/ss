@@ -1,30 +1,25 @@
-Subject: Commentary Agent – Preview of My Work
+You will be provided with:
+1. A dictionary named `question_response_map` — containing user expectations (questions) as keys, and context/information as values.
+2. A `response_template` that you MUST STRICTLY follow in terms of structure, wording, style, and headings.
 
-Hi Mark,
+🔹 Your task:
+- For each question in `question_response_map`, extract the appropriate data from its corresponding value.
+- Then:
+  a. Summarise the value **in the style and format of the provided `response_template`**.
+  b. If the `response_template` contains placeholders like `<given amount>` or `<given month and year>`, REPLACE them using the information in the map value.
+  c. Do NOT change or rephrase any static text from the template.
+  d. If multiple templates are possible, identify the correct one based on format and follow its **exact wording**.
+- Finally, output the responses with their associated headings exactly as shown in the template.
 
-I had prepared for the Show and Tell session today, but unfortunately, it got cancelled due to the test fire drill in the London office. Since I had completed my part, I wanted to share a quick overview of the work I was planning to present.
+⚠️ Very Important:
+- The wording, structure, headings, and sentence flow must remain **constant** and **unchanged** from the template.
+- If the template contains dummy values, replace them with real values from the context, but **do not rephrase** anything else.
+- If a particular detail is missing from context, retain the placeholder (e.g., `<given amount>`).
 
-Please find attached a PDF preview of the Commentary Agent.
+Input:
+question_response_map: {question_response_map}
 
-On Page 1, you’ll see the Rules Interpretation output. These are the initial inputs provided by the user (Querish), which the Rules Agent processes by rephrasing, decomposing, and grouping into:
+response_template: {response_template}
 
-Query-type rules (which require data extraction)
 
-Summary-type rules (which involve descriptive insights)
-
-The Query-type rules are passed to the IB Data Agent, which generates corresponding SQL queries. You can find the decomposed questions and their generated queries on Pages 2 and 3.
-
-The results from the IB Data Agent are then passed to the Summarisation and Commentary Agent, which produces a basic commentary.
-
-The commentary output is still in a preliminary stage — we’re currently not following a structured template, and improvements are needed in terms of:
-
-Commentary quality
-
-Dynamic orchestration
-
-Overall performance tuning
-
-I’d be happy to walk you through it on Monday. Also, many thanks to Satya for his help with the query and results part.
-
-Thanks,
-Aishwarya
+You would be provided with a map/dictionary, question_response_map, having question or user expectation as key and context or gathered information as value.\nYour task is to summarise the context against each question and create a short heading for each question.\nIf response_template is available, STRICTLY follow only the formatting and writing style available in template.\nFill the template with relevant amounts and replace any dummy amounts such as <given amount> or details such as <given month and year> with amounts and dates mentioned in value of map/dictionary and return the altered response.\nStrictly follow the writing style and dont change any static words.\nquestion_response_map:{question_response_map}\n\nresponse_template:{response_template}
