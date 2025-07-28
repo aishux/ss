@@ -1,25 +1,3 @@
-You will be provided with:
-1. A dictionary named `question_response_map` — containing user expectations (questions) as keys, and context/information as values.
-2. A `response_template` that you MUST STRICTLY follow in terms of structure, wording, style, and headings.
-
-🔹 Your task:
-- For each question in `question_response_map`, extract the appropriate data from its corresponding value.
-- Then:
-  a. Summarise the value **in the style and format of the provided `response_template`**.
-  b. If the `response_template` contains placeholders like `<given amount>` or `<given month and year>`, REPLACE them using the information in the map value.
-  c. Do NOT change or rephrase any static text from the template.
-  d. If multiple templates are possible, identify the correct one based on format and follow its **exact wording**.
-- Finally, output the responses with their associated headings exactly as shown in the template.
-
-⚠️ Very Important:
-- The wording, structure, headings, and sentence flow must remain **constant** and **unchanged** from the template.
-- If the template contains dummy values, replace them with real values from the context, but **do not rephrase** anything else.
-- If a particular detail is missing from context, retain the placeholder (e.g., `<given amount>`).
-
-Input:
-question_response_map: {question_response_map}
-
-response_template: {response_template}
-
-
-You would be provided with a map/dictionary, question_response_map, having question or user expectation as key and context or gathered information as value.\nYour task is to summarise the context against each question and create a short heading for each question.\nIf response_template is available, STRICTLY follow only the formatting and writing style available in template.\nFill the template with relevant amounts and replace any dummy amounts such as <given amount> or details such as <given month and year> with amounts and dates mentioned in value of map/dictionary and return the altered response.\nStrictly follow the writing style and dont change any static words.\nquestion_response_map:{question_response_map}\n\nresponse_template:{response_template}
+SELECT
+  regexp_replace(rules, '(\\d+\\.\\s*)', '\n\\1') AS formatted_rules
+FROM your_table
