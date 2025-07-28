@@ -1,1 +1,3 @@
-regexp_replace(rules, '(?<!^)(\\s)(\\d+\\.)', '\n\\2')
+SELECT
+  ltrim(regexp_replace(rules, '(?<!^)(\\s)(\\d+\\.)', '\n\\2')) AS formatted_rules
+FROM your_table
