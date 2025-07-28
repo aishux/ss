@@ -1,3 +1,9 @@
 SELECT
-  ltrim(regexp_replace(rules, '(?<!^)(\\s)(\\d+\\.)', '\n\\2')) AS formatted_rules
+  concat_ws('\n',
+    transform(
+      sort_array(collect_list(named_struct('order_col', rule_order, 'rule', rules))),
+      x -> x.rule
+    )
+  ) AS rules
 FROM your_table
+GROUP BY ...
