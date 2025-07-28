@@ -1,3 +1,4 @@
 SELECT
-  ltrim(regexp_replace(rules, '(?<!^)(\\d+\\.\\s*)', '\n\\1')) AS formatted_rules
+  regexp_replace(rules, '(\\d+\\.)', '\n\\1') AS formatted_rules,
+  ltrim(regexp_replace(rules, '(\\d+\\.)', '\n\\1')) AS formatted_rules
 FROM your_table
