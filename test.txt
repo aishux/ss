@@ -1,9 +1,4 @@
 SELECT
-  concat_ws('\n',
-    transform(
-      sort_array(collect_list(named_struct('order_col', rule_order, 'rule', rules))),
-      x -> x.rule
-    )
-  ) AS rules
+  concat_ws('\n', sort_array(collect_set(rules))) AS rules
 FROM your_table
 GROUP BY ...
