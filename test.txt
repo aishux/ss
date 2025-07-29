@@ -1,4 +1,10 @@
-SELECT
-  concat_ws('\n', sort_array(collect_set(rules))) AS rules
-FROM your_table
-GROUP BY ...
+Hi Radek and Priti,
+
+I’ve summarized the comments from the data sent by Radek and added them under the ai_comment column in the aggregated_comments tab.
+
+I’ve also included the prompt used for the summarization. Please note that the examples in the prompt remain unchanged, but based on my understanding, the AI has still done a decent job of generating relevant summaries.
+
+Let me know your thoughts or if any changes are needed.
+
+Best regards,
+Aishwarya
