@@ -1,10 +1,10 @@
 Hi Radek and Priti,
 
-I’ve summarized the comments from the data sent by Radek and added them under the ai_comment column in the aggregated_comments tab.
+I’ve attached the summarised comments as discussed.
 
-I’ve also included the prompt used for the summarization. Please note that the examples in the prompt remain unchanged, but based on my understanding, the AI has still done a decent job of generating relevant summaries.
+The example provided was quite helpful in guiding the structure and tone, and it contributed to framing the comments more effectively. If there’s a need to improve the quality of any specific section in the future, we can include short, targeted examples to help fine-tune the outputs further.
 
-Let me know your thoughts or if any changes are needed.
+Let me know if you have any feedback.
 
 Best regards,
 Aishwarya
