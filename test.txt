@@ -1,10 +1,16 @@
-Hi Radek and Priti,
+Subject: Invitation: Databricks AI in Action – Tomorrow!
 
-I’ve attached the summarised comments as discussed.
+Hi [Leads’ Names] and [CTL’s Name],
 
-The example provided was quite helpful in guiding the structure and tone, and it contributed to framing the comments more effectively. If there’s a need to improve the quality of any specific section in the future, we can include short, targeted examples to help fine-tune the outputs further.
+I’ll be speaking in an upcoming demo session tomorrow on Databricks AI functions, where we’ll showcase how these capabilities can streamline tasks like data exploration, summarisation, and intelligent automation.
 
-Let me know if you have any feedback.
+This is a great opportunity to see what’s possible within our current Databricks setup and how it can evolve our approach to building AI-enabled solutions. I believe it would be valuable for your teams to join and explore how they can potentially leverage these features in their work.
 
-Best regards,
+Date & Time: [Insert Date & Time]
+Duration: ~30 mins
+Link: [Insert Meeting Link]
+
+Looking forward to having you there!
+
+Best,
 Aishwarya
