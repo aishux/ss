@@ -1,30 +1,8 @@
-🔍 Databricks AI Functions: Bringing LLMs to SQL
-	•	Databricks AI Functions enable seamless use of Large Language Models (LLMs) directly within SQL, removing the need for complex pipelines, Python code, or infrastructure setup.
-	•	Designed for analysts and engineers who prefer SQL, these functions allow quick access to powerful AI capabilities like summarization, sentiment analysis, and text classification.
+Hi [CTL’s Name],
 
-⸻
+Due to heavy rains, the network and power have been fluctuating, and I may not be able to join smoothly today. I’m moving our 1:1 to Wednesday — please let me know if you’d like to reschedule to another time that works better for you.
 
-🧠 Key Highlights
-	•	Two types of functions:
-	1.	Built-in AI SQL Functions (focus of this demo)
-	2.	ai_query() for more advanced use cases (not covered today)
-	•	Powered by Databricks Foundation Model APIs
-	•	Currently uses the Mixtral-8x7B Instruct model (subject to change)
-	•	No need to deploy or manage models manually
+Apologies for the short notice, and thanks for your understanding.
 
-⸻
-
-🚀 How to Use
-	•	Available in Serverless or Pro SQL Warehouses
-	•	Call AI Functions directly in SQL queries
-	•	Examples:
-	•	ai_generate_text()
-	•	ai_classify()
-	•	ai_analyze_sentiment()
-
-⸻
-
-✅ Benefits
-	•	Low barrier to entry for using LLMs
-	•	Fast experimentation within SQL workflows
-	•	Great for prototyping and enhancing productivity
+Best regards,
+Aishwarya
