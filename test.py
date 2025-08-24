@@ -1,19 +1,3 @@
-import json
-
-try:
-    # Try to parse JSON output from the LLM
-    summary_dict = json.loads(text)
-except json.JSONDecodeError as e:
-    # Optionally try to clean up common formatting issues
-    cleaned = text.strip()
-    if cleaned.startswith("```json"):
-        cleaned = cleaned.replace("```json", "").replace("```", "").strip()
-    try:
-        summary_dict = json.loads(cleaned)
-    except Exception as e2:
-        raise ValueError(f"Failed to parse LLM output: {text[:300]}...\nError: {e2}")
-
-batch_summaries = []
-for row_id in comment_dict.keys():
-    original = row_mapping.get(row_id)
-    summary = summary_dict.get(row_id, {})  # safer with default
+{
+  "template_summarisation": "You will be provided with:\n\n1. A dictionary named `question_response_map` — containing user expectations (questions) as keys, and context/information as values.\n\n2. A `response_template` that you MUST STRICTLY follow in terms of structure, wording, style, and headings.\n\nYour task:\n- For each question in `question_response_map`, extract the appropriate data from its corresponding value.\n- Then:\n  a. Summarise the value **in the style and format of the provided `response_template`**.\n  b. If the `response_template` contains placeholders like `<given amount>` or `<given month and year>`, REPLACE them using the information in the map value.\n  c. Do NOT change or rephrase any static text from the template.\n  d. If multiple templates are possible, identify the correct one based on format and follow its **exact wording**.\n\nAdditional Rules for Financial Intelligence:\n1. Number Handling — Preserve the **original unit and scale** of numbers as provided in `question_response_map`. If input values are in **millions**, they must remain in **millions** (no conversion to billions, crores, lakhs, etc.). Do not round, abbreviate, or alter the numeric representation.\n2. Synonym Mapping for Financial Terms — Recognise synonyms and equivalents. For example: **NPBT**, **PBT**, **Profit Before Tax**, or entries from the **Balance Sheet/Financial Statement** all represent the same metric. **Revenue** may appear as **Turnover** or **Sales**. **Net Income** may appear as **Profit After Tax (PAT)**. Always map the correct value from `question_response_map` to the corresponding placeholder in the `response_template`.\n3. Missing Information — If a particular detail is missing from context, retain the placeholder (e.g., `<given amount>`).\n\nFinal Output:\n- Output the responses with their associated headings exactly as shown in the template.\n- The **wording, structure, headings, and sentence flow must remain constant** and unchanged from the template.\n- Only placeholders should be replaced with extracted values."
+}
