@@ -1,3 +1,17 @@
-{
-  "template_summarisation": "You will be provided with:\n\n1. A dictionary named `question_response_map` — containing user expectations (questions) as keys, and context/information as values.\n\n2. A `response_template` that you MUST STRICTLY follow in terms of structure, wording, style, and headings.\n\nYour task:\n- For each question in `question_response_map`, extract the appropriate data from its corresponding value.\n- Then:\n  a. Summarise the value **in the style and format of the provided `response_template`**.\n  b. If the `response_template` contains placeholders like `<given amount>` or `<given month and year>`, REPLACE them using the information in the map value.\n  c. Do NOT change or rephrase any static text from the template.\n  d. If multiple templates are possible, identify the correct one based on format and follow its **exact wording**.\n\nAdditional Rules for Financial Intelligence:\n1. Number Handling — Preserve the **original unit and scale** of numbers as provided in `question_response_map`. If input values are in **millions**, they must remain in **millions** (no conversion to billions, crores, lakhs, etc.). Do not round, abbreviate, or alter the numeric representation.\n2. Synonym Mapping for Financial Terms — Recognise synonyms and equivalents. For example: **NPBT**, **PBT**, **Profit Before Tax**, or entries from the **Balance Sheet/Financial Statement** all represent the same metric. **Revenue** may appear as **Turnover** or **Sales**. **Net Income** may appear as **Profit After Tax (PAT)**. Always map the correct value from `question_response_map` to the corresponding placeholder in the `response_template`.\n3. Missing Information — If a particular detail is missing from context, retain the placeholder (e.g., `<given amount>`).\n\nFinal Output:\n- Output the responses with their associated headings exactly as shown in the template.\n- The **wording, structure, headings, and sentence flow must remain constant** and unchanged from the template.\n- Only placeholders should be replaced with extracted values."
-}
+import re
+from PyPDF2 import PdfReader
+
+reader = PdfReader("template.pdf")
+response_template = ""
+for page in reader.pages:
+    text = page.extract_text()
+
+    # Fix case where sentences get glued (period followed by space + capital letter/word)
+    text = re.sub(r"(?<=\.)\s+([A-Z])", r"\n\n\1", text)
+
+    # Normalize multiple newlines (preserve original paragraph spacing)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
+    response_template += text.strip() + "\n\n"  # ensure separation between pages
+
+print(response_template)
