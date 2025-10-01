@@ -1,47 +1,58 @@
-import re
-from bs4 import BeautifulSoup
-
 async def your_function(self, prompt_template, summarization_template_input, response_template):
     print("################ RESPONSE TEMPLATE ################")
     print(response_template)
 
-    def compare(ai_html, response_template_str):
-        # Parse response_template raw string
-        expected_styles = []
-        pattern = r"Text:\s*(.*?)\s*\|\s*Font:\s*([\w,]+).*?\|\s*Colour:\s*(\d+)"
-        for match in re.finditer(pattern, response_template_str, re.DOTALL):
-            text, font, color = match.groups()
-            expected_styles.append({"text": text.strip(), "font": font.strip(), "color": color.strip()})
+    async def evaluate(ai_html, response_template_str):
+        """Ask AI to evaluate formatting correctness."""
+        eval_prompt = f"""
+        You are an evaluator. Check if the AI response matches the expected formatting exactly. 
+        Expected formatting rules: {response_template_str}
+        
+        AI Response:
+        {ai_html}
+        
+        Return ONLY a JSON object in this format:
+        {{
+          "Status": "pass" or "fail",
+          "Comment": "<brief reason or feedback>"
+        }}
+        """
+        evaluation = await self.invoke_commentary_llm(
+            prompt_template=eval_prompt,
+            prompt_inputs={}
+        )
+        return evaluation.content
 
-        # Extract AI styles from HTML
-        soup = BeautifulSoup(ai_html, "html.parser")
-        ai_styles = [{"text": t.get_text(strip=True), "style": t.attrs.get("style", "")}
-                     for t in soup.find_all()]
-
-        # Compare
-        mismatches = []
-        for expected in expected_styles:
-            match = next((a for a in ai_styles if expected["text"] in a["text"]), None)
-            if not match:
-                mismatches.append(f"Missing text: {expected['text']}")
-                continue
-            if expected["font"].lower() not in match["style"].lower():
-                mismatches.append(f"Font mismatch for '{expected['text']}'")
-            if expected["color"] not in match["style"]:
-                mismatches.append(f"Color mismatch for '{expected['text']}'")
-
-        return (len(mismatches) == 0, "; ".join(mismatches) if mismatches else "All match")
-
-    # Retry loop (max 2 times)
-    for attempt in range(1, 3):
+    # Retry loop (max 3 times)
+    for attempt in range(1, 4):
         ai_response_template = await self.invoke_commentary_llm(
             prompt_template=prompt_template,
             prompt_inputs=summarization_template_input
         )
         ai_html = ai_response_template.content
-        status, comment = compare(ai_html, response_template)
 
-        if status:   # ✅ pass → return HTML directly
-            return ai_html
-        elif attempt == 2:  # ❌ fail after 2 retries
-            return {"Status": "fail", "Comment": comment, "Output": ai_html}
+        result = await evaluate(ai_html, response_template)
+        try:
+            result_json = eval(result)  # or json.loads if AI outputs proper JSON
+        except:
+            result_json = {"Status": "fail", "Comment": "Invalid evaluation response"}
+
+        if result_json["Status"].lower() == "pass":
+            return ai_html  # ✅ pass → return final HTML
+
+        elif attempt < 3:
+            # ❌ failed → re-run with feedback
+            feedback_prompt = f"""
+            Fix the AI response using this feedback: {result_json['Comment']}.
+            Ensure it matches these formatting rules exactly: {response_template}
+            Original response:
+            {ai_html}
+            """
+            prompt_template = feedback_prompt  # replace prompt with corrective one
+        else:
+            # ❌ after 3 attempts → return fail
+            return {
+                "Status": "fail",
+                "Comment": result_json["Comment"],
+                "Output": ai_html
+            }
