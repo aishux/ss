@@ -1,5 +1,14 @@
-Hi King,
+Subject: Walkthrough of GTMIS, WARP, and LiFe Team Roles
 
-I spent some time looking into the roles of GTMIS, WARP, and LiFe teams and have put together my understanding in this diagram (a slightly more detailed view based on Brian’s architectural diagram). I’d be happy to walk through it with you on a call.
+Hi All,
 
-I initially assumed that Mart1 pod might handle Capital calculators and Mart2 would focus on Liquidity, or the other way around. However, based on what you mentioned today, it seems a bit different. I’m not entirely clear on how this is structured—has this already been decided, or is it determined by the POs?
+As discussed with King, I’ll be walking through my understanding of the GTMIS, WARP, and LiFe teams, along with a more detailed view of Brian’s architectural diagram that I put together. The idea is to validate the understanding and clarify the division of responsibilities (e.g., Capital calculators vs. Liquidity).
+
+Please find the meeting invite details below:
+📅 Date/Time: [Insert date & time]
+📍 Location: [Insert meeting link]
+
+Looking forward to your inputs and discussion.
+
+Best regards,
+Aishwarya
