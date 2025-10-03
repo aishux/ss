@@ -1,1 +1,5 @@
---extra-index-url https://pypi.org/simple
+Hi King,
+
+I spent some time looking into the roles of GTMIS, WARP, and LiFe teams and have put together my understanding in this diagram (a slightly more detailed view based on Brian’s architectural diagram). I’d be happy to walk through it with you on a call.
+
+I initially assumed that Mart1 pod might handle Capital calculators and Mart2 would focus on Liquidity, or the other way around. However, based on what you mentioned today, it seems a bit different. I’m not entirely clear on how this is structured—has this already been decided, or is it determined by the POs?
