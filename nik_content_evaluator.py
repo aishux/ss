@@ -61,8 +61,4 @@ async def content_validator(self, response_template, ai_response_content):
 
 
     # ❌ after 3 attempts → return fail
-    return {
-        "Status": "fail",
-        "Comment": result_json["Comment"],
-        "Output": ai_response_content
-    }
+    return ai_response_content
