@@ -51,7 +51,7 @@ async def content_validator(self, response_template, ai_response_content):
             result_json = {"Status": "fail", "Comment": "Invalid evaluation response"}
 
         if result_json["Status"].lower() == "pass":
-            return ai_response_content
+            return ai_response_content.strip("```").strip("html")
 
 
         # ❌ failed → re-run with feedback
@@ -86,4 +86,4 @@ async def content_validator(self, response_template, ai_response_content):
 
 
     # ❌ after 3 attempts → return fail
-    return ai_response_content
+    return ai_response_content.strip("```").strip("html")
