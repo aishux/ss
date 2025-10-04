@@ -39,6 +39,9 @@ async def content_validator(self, response_template, ai_response_content):
     for attempt in range(3):
 
         result = await evaluate(ai_response_content)
+
+        result = result.strip("```").strip("json")
+
         try:
             result_json = json.loads(result)
         except:
