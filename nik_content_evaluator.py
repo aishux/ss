@@ -7,26 +7,16 @@ async def content_validator(self, response_template, ai_response_content):
     async def evaluate(ai_response):
         """Ask AI to evaluate formatting correctness."""
         eval_prompt = """
-        You are a strict formatting evaluator. 
-        Do not evaluate the content, wording, or numbers — only the formatting structure.
-        
-        Expected formatting rules:
-        {response_template}
+        You are an evaluator. Check if the generated content matches the expected formatting exactly. 
+        Expected formatting rules: {response_template}
         
         Generated Content:
         {ai_response}
         
-        Evaluation Guidelines:
-        - Only check structural formatting (e.g., headers, bullet points, bold/italic usage, paragraph separation).
-        - Ignore numbers, text meaning, names, or wording differences.
-        - Ignore colors, font family, or font size unless explicitly required by the rules.
-        - If formatting matches exactly (even if numbers/text differ), return "pass".
-        - If formatting deviates (e.g., missing bold, wrong list type, extra/missing paragraph break), return "fail".
-        
-        Return ONLY a JSON object (no extra text) in this format:
+        Return ONLY a JSON object (no extra text) in below format as it will be directly put into json.loads method:
         {{
-          "Status": "pass" or "fail",
-          "Comment": "<brief reason if fail, describing which formatting rule was broken and how to correct it>"
+          "Status": "pass" if the generated content strictly matches the formatting or "fail" if otherwise,
+          "Comment": "<brief analysis about something which is not matching the formatting and how to correct it >"
         }}
         """
         evaluation = await self.invoke_commentary_llm(
