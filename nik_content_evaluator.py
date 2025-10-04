@@ -7,7 +7,7 @@ async def content_validator(self, response_template, ai_response_content):
     async def evaluate(ai_response):
         """Ask AI to evaluate formatting correctness."""
         eval_prompt = """
-        You are an evaluator. Check if the generated content matches the expected style formatting exactly as mentioned in the instructions template.
+        You are an evaluator. Check if the generated content matches the expected style formatting as mentioned in the instructions template.
         
         IMPORTANT:
         
@@ -16,6 +16,10 @@ async def content_validator(self, response_template, ai_response_content):
         For example if the instruction is: 
         Block Number: 5: Text: Global Banking | Formatting_Instructions- [Font: Aptos | Size: 12.0 | Colour: 16711689]
         then the html for this should be <div style="font-family: Aptos; font-size: 12; color: #FF0009">Global Banking<div>
+        - Don't consider uppercase vs lowercase in color codes as failure
+        - Don't consider the mention of units for example 'px' in font-size as failure as those are required.
+
+        DO NOT BE VERY CRITICAL JUST CHECK IF PRESENT CORRECTLY.
  
         Expected style formatting rules: {response_template}
         
