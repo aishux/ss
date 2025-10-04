@@ -5,16 +5,16 @@ async def your_function(self, prompt_template, summarization_template_input, res
     async def evaluate(ai_html, response_template_str):
         """Ask AI to evaluate formatting correctness."""
         eval_prompt = f"""
-        You are an evaluator. Check if the AI response matches the expected formatting exactly. 
-        Expected formatting rules: {response_template_str}
+        You are an evaluator. Check if the generated content matches the expected formatting exactly. 
+        Expected formatting rules: {response_template}
         
-        AI Response:
-        {ai_html}
+        Generated Content:
+        {ai_response}
         
-        Return ONLY a JSON object in this format:
+        Return ONLY a JSON object (no extra text) in below format as it will be directly put into json.loads method:
         {{
-          "Status": "pass" or "fail",
-          "Comment": "<brief reason or feedback>"
+          "Status": "pass" if the generated content strictly matches the formatting or "fail" if otherwise,
+          "Comment": "<brief analysis about something which is not matching the formatting and how to correct it >"
         }}
         """
         evaluation = await self.invoke_commentary_llm(
@@ -43,10 +43,15 @@ async def your_function(self, prompt_template, summarization_template_input, res
         elif attempt < 3:
             # ❌ failed → re-run with feedback
             feedback_prompt = f"""
-            Fix the AI response using this feedback: {result_json['Comment']}.
-            Ensure it matches these formatting rules exactly: {response_template}
-            Original response:
-            {ai_html}
+            Fix the generated content using this feedback: {failed_comment}
+            Your goal is to format the generated content exactly as per the formatting template below.
+            Formatting template:
+            {response_template}
+    
+            Original generated content:
+            {ai_response_content}
+    
+            Return only the corrected/generated content (not an explanation).
             """
             prompt_template = feedback_prompt  # replace prompt with corrective one
         else:
