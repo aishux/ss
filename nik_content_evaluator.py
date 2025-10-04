@@ -7,17 +7,25 @@ async def content_validator(self, response_template, ai_response_content):
     async def evaluate(ai_response):
         """Ask AI to evaluate formatting correctness."""
         eval_prompt = """
-        You are an evaluator. Check if the generated content matches the expected formatting exactly as mentioned in the instructions template. The content doesn't need to match but the formatting rules need to be followed.
-
-        Expected formatting rules: {response_template}
+        You are an evaluator. Check if the generated content matches the expected style formatting exactly as mentioned in the instructions template.
+        
+        IMPORTANT:
+        
+        - You are not supposed to evaluate the content just style formatting rules need to be followed.
+        - The rules are to be followed for generating HTML content only not plaintext. 
+        For example if the instruction is: 
+        Block Number: 5: Text: Global Banking | Formatting_Instructions- [Font: Aptos | Size: 12.0 | Colour: 16711689]
+        then the html for this should be <div style="font-family: Aptos; font-size: 12; color: #FF0009">Global Banking<div>
+ 
+        Expected style formatting rules: {response_template}
         
         Generated Content:
         {ai_response}
         
         Return ONLY a JSON object (no extra text) in below format as it will be directly put into json.loads method:
         {{
-          "Status": "pass" if the generated content strictly matches the formatting instructions or "fail" if otherwise,
-          "Comment": "<brief analysis about something which is not matching the formatting rules and how to correct it >"
+          "Status": "pass" if the generated content strictly matches the style formatting instructions or "fail" if otherwise,
+          "Comment": "<brief analysis about something which is not matching the style formatting rules and how to correct it >"
         }}
         """
         evaluation = await self.invoke_commentary_llm(
@@ -46,16 +54,23 @@ async def content_validator(self, response_template, ai_response_content):
         failed_comment = result_json['Comment']
         feedback_prompt = """
         Fix the generated content using this feedback: {failed_comment}
-        Your goal is to format the generated content exactly as per the rules mentioned in the formatting template below.
-        
-        Formatting rules template:
+        Your goal is to format the style of generated content exactly as per the rules mentioned in the style formatting rules template below.
+
+        Expected Style Formatting rules template:
         {response_template}
 
         Original generated content:
         {ai_response_content}
 
-        Return only the corrected content (not an explanation) as per the formatting rules. 
-        The content doesn't need to match but the formatting rules need to be followed.
+        IMPORTANT:
+        
+        - You are not supposed to evaluate the content just style formatting rules need to be followed.
+        - The rules are to be followed for generating HTML content only not plaintext. 
+        For example if the instruction is: 
+        Block Number: 5: Text: Global Banking | Formatting_Instructions- [Font: Aptos | Size: 12.0 | Colour: 16711689]
+        then the html for this should be <div style="font-family: Aptos; font-size: 12; color: #FF0009">Global Banking<div>
+
+        Return only the corrected content (not an explanation) as per the style formatting rules. 
         """
         
         updated_response = await self.invoke_commentary_llm(
