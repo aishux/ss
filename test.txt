@@ -1,14 +1,1 @@
-Subject: Walkthrough of GTMIS, WARP, and LiFe Team Roles
 
-Hi All,
-
-As discussed with King, I’ll be walking through my understanding of the GTMIS, WARP, and LiFe teams, along with a more detailed view of Brian’s architectural diagram that I put together. The idea is to validate the understanding and clarify the division of responsibilities (e.g., Capital calculators vs. Liquidity).
-
-Please find the meeting invite details below:
-📅 Date/Time: [Insert date & time]
-📍 Location: [Insert meeting link]
-
-Looking forward to your inputs and discussion.
-
-Best regards,
-Aishwarya
