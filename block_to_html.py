@@ -28,6 +28,11 @@ for block in blocks:
     html_segment_texts = []
     for i, text in enumerate(segments):
         text = text.strip()
+
+        # 🧹 Clean stray pipes and double spaces
+        text = re.sub(r'\s*\|\s*', ' ', text)
+        text = re.sub(r'\s+', ' ', text)
+        
         if not text:
             continue
 
