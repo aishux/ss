@@ -1,31 +1,37 @@
 import re
 import html
 
-data = """<paste your full text here>"""
+# Paste your raw text here
+raw_text = """<your full data>"""
 
-blocks = re.split(r'Block Number:\s*\d+:', data)
+# Step 1: Split text into blocks
+blocks = re.split(r'Block Number:\s*\d+:', raw_text)
+
 html_blocks = []
 
 for block in blocks:
-    if not block.strip():
+    block = block.strip()
+    if not block:
         continue
     
-    # Extract text and formatting
-    text_match = re.search(r'Text:\s*(.*?)(?:Formatting|<|$)', block, re.S)
-    font_match = re.search(r'Font:\s*([A-Za-z0-9 ]+)', block)
-    size_match = re.search(r'Size:\s*([\d.]+)', block)
-    color_match = re.search(r'Colour:\s*(\d+)', block)
+    # Step 2: Extract all 'Text:' segments within the block
+    texts = re.findall(r'Text:\s*([^|<\n]+)', block)
     
-    text = html.escape(text_match.group(1).strip()) if text_match else ""
-    font = font_match.group(1).strip() if font_match else "Arial"
-    size = float(size_match.group(1)) if size_match else 12
-    color = f"#{int(color_match.group(1)):06x}" if color_match else "#000000"
+    # Step 3: Join and clean the text
+    combined_text = ' '.join(t.strip() for t in texts)
     
-    # Build styled span
-    styled_text = f'<p style="font-family:{font}; font-size:{size}px; color:{color};">{text}</p>'
-    html_blocks.append(styled_text)
+    # Remove extra spaces and formatting junk
+    combined_text = re.sub(r'\s+', ' ', combined_text)
+    combined_text = html.escape(combined_text.strip())
+    
+    # Step 4: Wrap as HTML paragraph
+    html_blocks.append(f"<p>{combined_text}</p>")
 
-html_content = "<html><body>" + "\n".join(html_blocks) + "</body></html>"
+# Step 5: Combine everything into a clean HTML file
+html_content = "<html><body>\n" + "\n".join(html_blocks) + "\n</body></html>"
 
-with open("output.html", "w", encoding="utf-8") as f:
+# Step 6: Save to file
+with open("output_clean.html", "w", encoding="utf-8") as f:
     f.write(html_content)
+
+print("✅ Clean HTML created: output_clean.html")
