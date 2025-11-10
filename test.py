@@ -15,8 +15,8 @@ for block in blocks:
     # Extract all Text segments
     segments = re.findall(r'Text:\s*(.*?)(?=(?:Formatting|Block Number:|$))', block, re.S)
 
-    # Extract formatting info (bold/italic)
-    formats = re.findall(r'Font:\s*([A-Za-z0-9 ]+)(?:,\s*(Bold|Italic))?', block)
+    # Extract formatting info
+    formats = re.findall(r'Font:\s*[A-Za-z0-9 ]+(?:,\s*(Bold|Italic))?', block, re.I)
 
     md_segments = []
     for i, text in enumerate(segments):
@@ -27,27 +27,27 @@ for block in blocks:
         if not text:
             continue
 
-        # Detect style (if available)
-        style = formats[i][1] if i < len(formats) else ""
+        # Detect style
+        style = formats[i] if i < len(formats) else ""
 
-        # Apply markdown formatting (no space inside)
-        if "Bold" in style and "Italic" in style:
+        # Apply markdown formatting (no extra spaces)
+        if "bold" in style.lower() and "italic" in style.lower():
             text = f"***{text}***"
-        elif "Bold" in style:
+        elif "bold" in style.lower():
             text = f"**{text}**"
-        elif "Italic" in style:
+        elif "italic" in style.lower():
             text = f"*{text}*"
 
         md_segments.append(text)
 
-    # Combine text in the block
+    # Combine all text in the block
     block_text = " ".join(md_segments).strip()
 
-    # Determine if block should be heading
-    # Keywords like “Results”, “Global Banking”, “Total Revenues” are headings
-    if re.search(r'\bResults?\b', block_text, re.IGNORECASE):
+    # Determine heading vs paragraph
+    if re.search(r'\bresults?\b', block_text, re.IGNORECASE):
         block_md = f"## {block_text}"
-    elif re.search(r'\b(Global Banking|Total Revenues)\b', block_text, re.IGNORECASE):
+    elif len(block_text.split()) <= 6 and not re.search(r'\b(block|text)\b', block_text, re.I):
+        # short lines are headings (e.g. Total revenues, Global Banking)
         block_md = f"#### {block_text}"
     else:
         block_md = block_text  # normal paragraph
@@ -56,6 +56,7 @@ for block in blocks:
 
 # Join all blocks with spacing
 markdown_output = "\n\n".join(md_blocks)
+markdown_output = re.sub(r'\s+(?=[*_#])', '', markdown_output)  # remove unwanted spaces
 
 # Save to file
 with open("output.md", "w", encoding="utf-8") as f:
