@@ -15,7 +15,7 @@ for block in blocks:
     # Extract all Text segments
     segments = re.findall(r'Text:\s*(.*?)(?=(?:Formatting|Block Number:|$))', block, re.S)
 
-    # Extract formatting info
+    # Extract formatting info (bold/italic)
     formats = re.findall(r'Font:\s*([A-Za-z0-9 ]+)(?:,\s*(Bold|Italic))?', block)
 
     md_segments = []
@@ -27,10 +27,10 @@ for block in blocks:
         if not text:
             continue
 
-        # Detect style
+        # Detect style (if available)
         style = formats[i][1] if i < len(formats) else ""
 
-        # Apply markdown formatting
+        # Apply markdown formatting (no space inside)
         if "Bold" in style and "Italic" in style:
             text = f"***{text}***"
         elif "Bold" in style:
@@ -40,22 +40,24 @@ for block in blocks:
 
         md_segments.append(text)
 
-    # Combine all text in the block
+    # Combine text in the block
     block_text = " ".join(md_segments).strip()
 
-    # Determine heading level
-    # If contains 'Results' (case-insensitive), make it h2, else h4
+    # Determine if block should be heading
+    # Keywords like “Results”, “Global Banking”, “Total Revenues” are headings
     if re.search(r'\bResults?\b', block_text, re.IGNORECASE):
         block_md = f"## {block_text}"
-    else:
+    elif re.search(r'\b(Global Banking|Total Revenues)\b', block_text, re.IGNORECASE):
         block_md = f"#### {block_text}"
+    else:
+        block_md = block_text  # normal paragraph
 
     md_blocks.append(block_md)
 
-# Join all blocks with line spacing
+# Join all blocks with spacing
 markdown_output = "\n\n".join(md_blocks)
 
-# Save to .md file
+# Save to file
 with open("output.md", "w", encoding="utf-8") as f:
     f.write(markdown_output)
 
