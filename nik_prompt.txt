@@ -1,0 +1,104 @@
+Your task is to generate a final response STRICTLY following the provided Template or Reference document.
+
+#### Inputs: You would be provided with the following inputs:
+1. original_question_set: A set of multiple user questions.
+
+2. question_response_map: This dataset will have the following structure. The key is the multi-part user question, and the value is a set of decomposed questions/sub-questions and their related responses.
+{{
+    'multi-part question1':
+    'sub_question1:...,
+    AI_response:...,
+
+   'multi-part question2:
+   'sub_question2:...,
+   AI_response:..., 
+}}
+
+3. response_reference: This reference object contains sample reference data along with block number, font, size, and color for each line/text extracted from the user-provided reference document. Below is the format:
+Block Number: 1:
+Text: <some text> | Font: <some font> | Size: ‹some size› | Colour: <some colour>
+Block Number: 2:
+Text: <some text> | Font: ‹some font> | Size: ‹some size> | Colour: ‹some colour>
+
+
+#### Output:
+The final response must STRICTLY follow and match the response_reference in terms of:
+- writing style
+- Section structure
+- Language
+- Content/text
+- Paragraph count and order
+- Formatting (e.q., bold, italic, headings, line breaks, etc.)
+The final output will be displayed on a Web UI. Use appropriate **HTML MARKDOWN tags** for formatting:
+- To create a heading, add number signs (#) in front of a word or phrase. The number of number signs you use should correspond to the heading level. For example, to create a heading level three (<h3>), use three number signs (e.g., ### My Header).
+- To bold text, add two asterisks before and after a word or phrase.
+- To italicize text, add one asterisk before and after a word or phrase.
+
+
+#### Guidelines:
+1. Preserve All Paragraphs with Conditional Line Omission
+-Foreach question in original_question_set, identify the matching question in question_response map and the corresponding block(s) in response_reference.
+- For multi-paragraph content in the response_reference, ensure that **all paragraphs are preserved in the final response.**
+- Replace the content in each paragraph with the corresponding data from the question_ response_map, but do not delete or omit entire paragraphs
+- **Critical Rule**: If a line in the response_reference contains a number of detail that is **not found in the question_response_map**, omit
+**only that specific line or phrase** sensibly while keeping the rest of the paragraph intact. For example, if there is no context present about PPA effects or integration-related expenses in question_response_map then omit only that phrase or line from the output
+- **Ensure that no necessary information or sections are omitted** and the final response **follows the style and structure of the response_reference.**
+- Do **not** invent or assume any numbers or details. If data is missing, simply remove that part without introducing placeholders or hypothetical values.
+- Maintain the original tone, formatting, and paragraph structure of the response_reference for consistency.
+
+2. **Strictly Follow the Reference Structure**:
+- The final response must match the structure, headings, and paragraph count of the response_reference. Do not add, remove, or reorder any headings or paragraphs.
+- The content under each block or section should be of the same volume/length as the related block/section in the response_reference, but replace the content with the latest available data from the question response map.
+
+3. **Summarization Does Not Mean Omission**:
+- When summarizing, **do not omit any paragraphs or sections**. Instead, rewrite the content in a concise manner while preserving the meaning and structure of the original text.
+- If the 'response_reference contains multiple paragraphs under a heading, ensure that the final response also contains the same number of paragraphs.
+
+4. **Handle Missing Data Gracefully**:
+- If the data to answer a given question in original_question_set is not available in the question_response map, then simply **remove that part sensibly by omitting that phrase and do not introduce placeholders or hypothetical values.** 
+
+5. *Number Handling*:
+- Preserve the **original unit and scale** of numbers as provided in the question response_map. If input values are in *millions, they must remain in **millions** (no conversion to billions, crores, lakhs, etc.). Do not round, abbreviate, or alter the numeric representation.
+**DO NOT EDIT ANY NUMBERS found from question_response_map**
+
+6. **Synonym Mapping for Financial Terms**:
+- Recognize synonyms and equivalents. For example: *NPBT, **PBT, **Profit Before Tax, or entries from the **Balance Sheet/Financial Statement* all represent the same metric.
+
+7. *Validation*:
+- After generating the final response, validate that the structure, headings, and number of paragraphs match the response_reference. If any discrepancies are found, revise the response to ensure alignment.
+
+#### Example:
+response reference:
+Block Number: 1:
+Text: Global Banking
+Block Number: 2:
+Text: para 1
+Block Number: 3:
+Text: para 2
+Block Number: 4:
+Text: para 3
+
+Final response:
+### Global Banking
+para 1 (updated content from question_response_map)
+para 2 (updated content from question_response_map)
+para 3 (updated content from question_response_map)
+#### Inputs:
+
+original_question_set:
+{original_question_set}
+
+question_response_map:
+{question_response_map}
+
+response_reference:
+{response_reference}
+
+*IMPORTANT* RECHECK:
+
+- Make sure you haven't converted any numbers or invented any numbers, for instance make sure you haven't converted millions to billions
+- If number or its context (where it is coming from) is not present then you should not have the related text (YOU DO NOT INVENT THE PHRASE YOU OMIT IT)
+- There is a compulsion for you to do: If the heading is templated as 'Results: 2Q24 vs 2Q23' and the questions and answers are about Q4 of 2024 and 2025 then you should be smart enough to change the heading to 'Results: 4Q25 vs 4Q24'.
+
+
+*NO HALLUCINATION AND NO INVENTION OF NUMBERS (NUMBERS ARE VERY CRUCIAL)*
