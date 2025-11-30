@@ -1,3 +1,5 @@
+https://cookbook.openai.com/examples/reproducible_outputs_with_the_seed_parameter
+
 Your task is to generate a final response STRICTLY following the provided Template or Reference document.
 
 #### Inputs: You would be provided with the following inputs:
