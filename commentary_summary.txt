@@ -26,11 +26,6 @@ You must reconstruct the `response_reference` by replacing all dummy values ("xx
    - Replace them with the exact matching number from `question_response_map`.
    - **Number Formatting**: PRESERVE the unit from `question_response_map`. If the map says "477m", write "477m". Do NOT convert to billions or full integers.
 
-**4. Handling Missing Data (The "PPA" Rule)**
-   - If the `response_reference` contains a clause about a specific metric (e.g., "integration-related expenses" or "PPA effects") but that data points DOES NOT EXIST in `question_response_map`:
-   - **Action**: You must surgically remove that specific phrase/clause to make the sentence grammatically correct.
-   - **Prohibition**: Do NOT leave "xxx" in the final output. Do NOT halllucinate/invent a number.
-
 ### Formatting & Structure Guidelines:
 
 **1. Strict Structural Mirroring**
