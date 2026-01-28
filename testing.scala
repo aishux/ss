@@ -53,3 +53,30 @@ Then("""^the output should be "([^"]*)", "([^"]*)", "([^"]*)"$""") {
 
     actual shouldBe Some(Seq(v1, v2, v3))
 }
+
+
+Then("""^the output should be "([^"]*)", "([^"]*)", "([^"]*)"$""") {
+  (v1: String, v2: String, v3: String) =>
+
+    val row = outputRows.headOption.getOrElse(fail("No output rows produced"))
+
+    // 1. Get the Main Struct (COVID_FLAG) as a ROW, not a String
+    val covidFlagStruct = row.getAs[Row]("COVID_FLAG")
+
+    // 2. Get the Nested 'result' Struct as a ROW
+    // We use Option() to handle cases where 'result' might be null
+    val actualValues = Option(covidFlagStruct.getAs[Row]("result")) match {
+      case Some(res) => 
+        Seq(
+          String.valueOf(res.getAs[Any]("COVID_FLAG")),        // Extract nested COVID_FLAG
+          String.valueOf(res.getAs[Any]("AdjTenorDate")),      // Extract nested AdjTenorDate
+          String.valueOf(res.getAs[Any]("NSFRR_REASON_CODE"))  // Extract nested NSFRR_REASON_CODE
+        )
+      case None => 
+        // Handle case where result struct itself is null
+        Seq("null", "null", "null") 
+    }
+
+    // 3. Compare
+    actualValues shouldBe Seq(v1, v2, v3)
+}
