@@ -43,3 +43,13 @@ Then("""^the output should be "([^"]*)", "([^"]*)", "([^"]*)"$""") {
 
     actual shouldBe Seq(v1, v2, v3)
 }
+
+
+
+Then("""^the output should be "([^"]*)", "([^"]*)", "([^"]*)"$""") {
+  (v1: String, v2: String, v3: String) =>
+
+    val actual = outputRows.headOption.map { row => row.toSeq.takeRight(3).map(e => Option(e).map(_.toString).getOrElse("")) }
+
+    actual shouldBe Some(Seq(v1, v2, v3))
+}
