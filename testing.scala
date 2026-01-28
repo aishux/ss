@@ -27,3 +27,19 @@ Then("""^the output should be "([^"]*)", "([^"]*)", "([^"]*)"$""") {
 
 
 System.err.println(s"DEBUG: DataFrame Schema: ${df.schema.treeString}")
+
+
+
+Then("""^the output should be "([^"]*)", "([^"]*)", "([^"]*)"$""") {
+  (v1: String, v2: String, v3: String) =>
+
+    val row = outputRows.headOption.getOrElse(fail("No output rows produced"))
+
+    val actual = Seq(
+      row.getAs[String]("COVID_FLAG"),
+      row.getAs[String]("AdjTenorDate"),
+      row.getAs[String]("NSFRR_REASON_CODE")
+    )
+
+    actual shouldBe Seq(v1, v2, v3)
+}
