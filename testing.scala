@@ -24,3 +24,6 @@ Then("""^the output should be "([^"]*)", "([^"]*)", "([^"]*)"$""") {
 
     actual shouldBe Some(Seq(v1, v2, v3))
 }
+
+
+System.err.println(s"DEBUG: DataFrame Schema: ${df.schema.treeString}")
