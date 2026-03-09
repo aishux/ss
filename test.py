@@ -1,39 +1,32 @@
-From line 34-68 try replacing with this:
+Then("""^Residual Tenor output should contain:$""") { dataTable: io.cucumber.datatable.DataTable =>
+  import scala.jdk.CollectionConverters._
+  import org.apache.spark.sql.functions.col
 
+  val expectedRows = dataTable.asMaps().asScala.map(_.asScala.toMap).toList
+  
+  // 1. Identify exactly which columns the test cares about (e.g., LCR_RESIDUAL_TENOR)
+  val targetCols = expectedRows.head.keys.toSeq
 
-// 1. Define columns and target types (Keep your existing definition)
-val allColumnsWithTypes = Seq(
-  "REGION_CODE" -> StringType,
-  "SAP_FUNCTIONAL_AREA_CODE" -> StringType,
-  "GCR_REGULATORY_PRODUCT_TYPE" -> StringType,
-  "NEW_RESIDUAL_TNR_DAYS" -> IntegerType
-)
-val allColumns = allColumnsWithTypes.map(_._1)
+  // 2. STRICTLY select only the target columns. 
+  // This bypasses NEW_RESIDUAL_TNR_DAYS and prevents Catalyst from crashing.
+  val safeDF = outputDF.select(targetCols.map(c => col(c).cast("string")): _*)
 
-// 2. Read rows from Cucumber (Keep your existing definition)
-val rows = dataTable.asMaps().asScala.map(_.asScala.toMap).toList
+  // Optional Debug: This is now safe because the corrupted column is excluded
+  safeDF.show(false)
 
-// 3. Build data purely as Strings (REMOVE the manual v.toInt logic)
-val data = rows.map { row =>
-  allColumns.map(colName => row.getOrElse(colName, null))
-}
+  // 3. Collect and map exactly like before
+  val actualRows = safeDF.collect().map { row =>
+    targetCols.map { colName =>
+      val value = row.getAs[String](colName)
+      (colName, Option(value).getOrElse(""))
+    }.toMap
+  }.toList
 
-// 4. Create an ALL-STRING schema for the initial load
-val stringSchema = StructType(allColumns.map(name => StructField(name, StringType, nullable = true)))
+  val normalizedExpectedRows = expectedRows.map { row =>
+    row.map { case (k, v) => (k, if (v == null || v == "null") "" else v) }
+  }
 
-// 5. Create the raw DataFrame natively as Strings
-DataDF = spark.createDataFrame(
-  spark.sparkContext.parallelize(data.map(Row.fromSeq)),
-  stringSchema
-)
-
-// 6. Let Spark natively cast the columns to their target types
-allColumnsWithTypes.foreach { case (colName, dataType) =>
-  if (dataType != StringType) {
-    DataDF = DataDF.withColumn(colName, col(colName).cast(dataType))
+  normalizedExpectedRows.foreach { expectedRow =>
+    actualRows should contain (expectedRow)
   }
 }
-
-// Optional Debug: Verify the native casting worked
-DataDF.printSchema()
-DataDF.show(false)
